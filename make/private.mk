@@ -15,6 +15,7 @@ WORKDIR_DEPS = $(WORKDIR_ROOT)/deps
 # Includes
 include make/deps.mk
 include bowerbird.mk
+include test/bowerbird-test/test-string-compare.mk
 
  # Targets
 .PHONY: private_clean
