@@ -16,6 +16,7 @@ WORKDIR_DEPS = $(WORKDIR_ROOT)/deps
 include make/deps.mk
 include bowerbird.mk
 include test/bowerbird-test/test-find-test-files.mk
+include test/bowerbird-test/test-find-test-targets.mk
 include test/bowerbird-test/test-string-compare.mk
 
  # Targets
