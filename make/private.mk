@@ -17,6 +17,8 @@ include make/deps.mk
 include bowerbird.mk
 include test/bowerbird-test/test-find-test-files.mk
 include test/bowerbird-test/test-find-test-targets.mk
+include test/bowerbird-test/test-generate-test-runner.mk
+include test/bowerbird-test/test-run-test-decorator.mk
 include test/bowerbird-test/test-string-compare.mk
 
  # Targets
