@@ -25,9 +25,12 @@ define bowerbird::generate-test-runner # id, path, file-pattern
         -include $$(BOWERBIRD_TEST_FILES/$1)
     endif
 
+    .PHONY: bowerbird-test/list-tests/$1
+    bowerbird-test/list-tests/$1:
+		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";$(NEWLINE))
+
     .PHONY: bowerbird-test/run-tests/$1
     bowerbird-test/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
-		@echo "tests: $$^"
 		@printf "\e[1;32mAll Test Passed\e[0m\n"
 endef
 
