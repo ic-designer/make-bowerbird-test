@@ -15,11 +15,6 @@ WORKDIR_DEPS = $(WORKDIR_ROOT)/deps
 # Includes
 include make/deps.mk
 include bowerbird.mk
-include test/bowerbird-test/test-find-test-files.mk
-include test/bowerbird-test/test-find-test-targets.mk
-include test/bowerbird-test/test-generate-test-runner.mk
-include test/bowerbird-test/test-run-test-decorator.mk
-include test/bowerbird-test/test-string-compare.mk
 
  # Targets
 .PHONY: private_clean
@@ -31,5 +26,6 @@ private_clean:
 	@echo "INFO: Cleaning complete."
 	@echo
 
+$(eval $(call bowerbird::generate-test-runner,bowerbird-tests,test/bowerbird-test/,test*.mk))
 .PHONY: private_test
-private_test:
+private_test: bowerbird-test/run-tests/bowerbird-tests
