@@ -1,5 +1,4 @@
 # Targets
-.PHONY: test-run-test-decorator-failing-test
 test-run-test-decorator-failing-test:
 	! $(MAKE) @bowerbird-test/run-test/bowerbird-test/failing-test
 	test -f $(WORKDIR_TEST)/bowerbird-test/failing-test/failing-test.$(BOWERBIRD_TEST_STDOUT_EXT)
@@ -10,7 +9,6 @@ bowerbird-test/failing-test:
 	exit 1
 
 
-.PHONY: test-run-test-decorator-passing-test
 test-run-test-decorator-passing-test:
 	$(MAKE) @bowerbird-test/run-test/bowerbird-test/passing-test
 	test -f $(WORKDIR_TEST)/bowerbird-test/passing-test/passing-test.$(BOWERBIRD_TEST_STDOUT_EXT)
@@ -21,7 +19,6 @@ bowerbird-test/passing-test:
 	exit 0
 
 
-.PHONY: test-run-test-decorator-hierarchical-name
 test-run-test-decorator-hierarchical-name:
 	$(MAKE) @bowerbird-test/run-test/bowerbird-test/alpha/beta/gamma/hierarchical-name
 	test -f $(WORKDIR_TEST)/bowerbird-test/alpha/beta/gamma/hierarchical-name/hierarchical-name.$(BOWERBIRD_TEST_STDOUT_EXT)

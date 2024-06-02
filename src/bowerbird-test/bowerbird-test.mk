@@ -29,6 +29,8 @@ define bowerbird::generate-test-runner # id, path, file-pattern
         -include $$(BOWERBIRD_TEST_FILES/$1)
     endif
 
+    .PHONY: $$(BOWERBIRD_TEST_TARGETS/$1)
+
     .PHONY: bowerbird-test/list-tests/$1
     bowerbird-test/list-tests/$1:
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";$(NEWLINE))
