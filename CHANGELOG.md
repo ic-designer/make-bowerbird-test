@@ -18,7 +18,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - YYYY-MM-DD
 
 ### Added
+- Initial release.
+- Test runner now enables undefined an variable warning and fails when an undefined
+  variable is encountered.
+- Created macros for comparing strings, sets/lists, files.
+- Added tests for checking the printed output from the test runner.
 ### Changed
+- Separated the test-runner source files from the comparison macos.
 ### Deprecated
 ### Fixed
+- Removed an unused reference to the obsolete NEWLINE macro.
+- Removed  unnecessary comments and newlines from the test files.
 ### Security
