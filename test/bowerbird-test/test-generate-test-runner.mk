@@ -5,7 +5,7 @@ $(eval $(call bowerbird::generate-test-runner,mock-tests,test/mock-tests,mock-te
 # Targets
 .PHONY: test-generate-test-runner-mock-test-files
 test-generate-test-runner-mock-test-files:
-	$(call bowerbird::test::string_compare,$(BOWERBIRD_TEST_FILES/mock-tests),/Users/jfreden/wa/repos/make-bowerbird-test/test/mock-tests/alpha/beta/gamma/mock-test-gamma.mk /Users/jfreden/wa/repos/make-bowerbird-test/test/mock-tests/alpha/beta/mock-test-beta.mk /Users/jfreden/wa/repos/make-bowerbird-test/test/mock-tests/alpha/mock-test-alpha.mk)
+	$(call bowerbird::test::string_compare,$(BOWERBIRD_TEST_FILES/mock-tests),$(abspath test/mock-tests/alpha/beta/gamma/mock-test-gamma.mk) $(abspath test/mock-tests/alpha/beta/mock-test-beta.mk) $(abspath test/mock-tests/alpha/mock-test-alpha.mk))
 
 .PHONY: test-generate-test-runner-mock-test-targets
 test-generate-test-runner-mock-test-targets:
