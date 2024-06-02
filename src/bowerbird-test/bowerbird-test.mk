@@ -41,7 +41,7 @@ endef
 # Decorator Targets
 @bowerbird-test/run-test/%: bowerbird-test/force
 	@mkdir -p $(WORKDIR_TEST)/$*
-	@($(MAKE) $* \
+	@($(MAKE) --debug=v $* SHELL:='$(shell command -v sh) -x' \
 			1>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) \
 			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
 			printf "\e[1;32mPassed\e[0m: $*\n") || \
