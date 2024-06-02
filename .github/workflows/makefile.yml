@@ -23,3 +23,11 @@ jobs:
       run: |
         make clean
         make test
+    - name: Run help
+      run: |
+        make clean
+        make help
+    - name: Run default
+      run: |
+        make clean
+        make
