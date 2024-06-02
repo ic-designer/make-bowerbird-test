@@ -3,7 +3,6 @@ WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
 BOWERBIRD_TEST_STDERR_EXT = stderr.txt
 BOWERBIRD_TEST_STDOUT_EXT = stdout.txt
 
-
 # Recipes
 define bowerbird::test::find-test-files # path, pattern
 $(shell find $(abspath $1) -type f -name '$2')
@@ -36,12 +35,12 @@ endef
 
 # Decorator Targets
 @bowerbird-test/run-test/%: bowerbird-test/force
-	mkdir -p $(WORKDIR_TEST)/$*
-	($(MAKE) $* \
+	@mkdir -p $(WORKDIR_TEST)/$*
+	@($(MAKE) $* \
 			1>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) \
 			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
-			printf "\e[1;32mPassed: $*\e[0m\n") || \
-	(printf "\e[1;31mFailed: $*\e[0m\n" && exit 1)
+			printf "\e[1;32mPassed\e[0m: $*\n") || \
+	(printf "\e[1;31mFailed\e[0m: $*\n" && exit 1)
 
 .PHONY: bowerbird-test/force
 bowerbird-test/force:
