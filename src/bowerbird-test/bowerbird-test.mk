@@ -50,6 +50,7 @@ endef
 	(printf "\e[1;31mFailed\e[0m: $*\n" && \
 			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) && \
 			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
+            printf "\e[1;31mFailed\e[0m: $*\n" && \
 			exit 1)
 
 .PHONY: bowerbird-test/force
