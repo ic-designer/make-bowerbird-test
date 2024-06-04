@@ -12,15 +12,6 @@ define bowerbird::test::find-test-targets # list of files
 $(shell sed -n 's/\(^test[^:]*\):.*/\1/p' $1)
 endef
 
-define bowerbird::test::compare-string # lhs, rhs
-    test "$1" = "$2" || (echo "ERROR: Failed string comparison: '$1' != '$2'" >&2 && exit 1)
-endef
-
-define bowerbird::test::compare-sets # lhs, rhs
-    test "$(sort $1)" = "$(sort $2)" || (echo "ERROR: Failed list comparison: '$(sort $1)' != '$(sort $2)'" >&2 && exit 1)
-endef
-
-
 define bowerbird::generate-test-runner # id, path, file-pattern
     BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$3)
     $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$3'))
