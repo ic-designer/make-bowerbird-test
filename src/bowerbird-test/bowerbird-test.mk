@@ -33,7 +33,7 @@ define bowerbird::generate-test-runner # id, path, file-pattern
 
     .PHONY: bowerbird-test/list-tests/$1
     bowerbird-test/list-tests/$1:
-		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";$(NEWLINE))
+		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";)
 
     .PHONY: $1
     $1: bowerbird-test/list-tests/$1 $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
