@@ -31,3 +31,8 @@ jobs:
       run: |
         make clean
         make
+    - name: Run clean with test
+      run: |
+        make clean
+        make clean test
+        make test clean
