@@ -12,4 +12,4 @@ include $(BOWERBIRD_DEPS.MK)
 
 # Load Dependencies
 $(eval $(call bowerbird::git-dependency,BOWERBIRD_HELP,https://github.com/ic-designer/make-bowerbird-help.git,main,bowerbird.mk))
-$(eval $(call bowerbird::git-dependency,BOWERBIRD_GIT,https://github.com/ic-designer/make-bowerbird-git.git,main,bowerbird.mk))
+$(eval $(call bowerbird::git-dependency,BOWERBIRD_GITHOOKS,https://github.com/ic-designer/make-bowerbird-githooks.git,main,bowerbird.mk))
