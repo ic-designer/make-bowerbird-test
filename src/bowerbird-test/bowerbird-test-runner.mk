@@ -32,11 +32,16 @@ define bowerbird::generate-test-runner # id, path, file-pattern
 endef
 
 # Decorator Targets
+__UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
+
 @bowerbird-test/run-test/%: bowerbird-test/force
 	@mkdir -p $(WORKDIR_TEST)/$*
-	@($(MAKE) --debug=v $* SHELL:='$(shell command -v sh) -x' \
+	@($(MAKE) --debug=v $* SHELL:='$$(shell command -v sh) -x' \
 			1>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) \
 			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
+			(! (grep -v "grep.*$(__UNDEFINED_VARIABLE_WARNING_STRING)" \
+					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) | \
+					grep "warning: undefined variable") || exit 1) && \
 			printf "\e[1;32mPassed\e[0m: $*\n") || \
 	(printf "\e[1;31mFailed\e[0m: $*\n" && \
 			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) && \
