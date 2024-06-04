@@ -1,4 +1,3 @@
-# Targets
 test-run-test-decorator-failing-test:
 	! $(MAKE) @bowerbird-test/run-test/bowerbird-test/failing-test
 	test -f $(WORKDIR_TEST)/bowerbird-test/failing-test/failing-test.$(BOWERBIRD_TEST_STDOUT_EXT)

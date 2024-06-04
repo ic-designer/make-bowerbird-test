@@ -1,5 +1,3 @@
-# Targets
-
 test-find-test-targets-mock-path-only-alpha:
 	$(call bowerbird::test::compare-sets,$(call bowerbird::test::find-test-targets,test/mock-tests/alpha/mock-test-alpha.mk),test-find-files-alpha-1 test-find-files-alpha-2)
 

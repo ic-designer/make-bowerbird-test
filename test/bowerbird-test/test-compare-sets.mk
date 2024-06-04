@@ -1,4 +1,3 @@
-# Targets
 test-compare-sets-one-element-equal-same-elements:
 	$(call bowerbird::test::compare-sets,alpha,alpha)
 

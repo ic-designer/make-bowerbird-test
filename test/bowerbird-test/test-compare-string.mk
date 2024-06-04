@@ -1,4 +1,3 @@
-# Targets
 test-compare-string-equal:
 	$(call bowerbird::test::compare-string,alpha,alpha)
 

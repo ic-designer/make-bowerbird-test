@@ -1,4 +1,3 @@
-# Targets
 define bowerbird::test::mock-test-files
 $(call bowerbird::test::find-test-files,test/mock-tests,mock-test*.mk)
 endef
