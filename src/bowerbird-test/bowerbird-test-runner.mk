@@ -8,11 +8,11 @@ define bowerbird::test::find-test-files # path, pattern
 $(shell find $(abspath $1) -type f -name '$2')
 endef
 
-define bowerbird::test::find-test-targets # list of files
+define bowerbird::test::find-test-targets # list of test files
 $(shell sed -n 's/\(^test[^:]*\):.*/\1/p' $1)
 endef
 
-define bowerbird::generate-test-runner # id, path, file-pattern
+define bowerbird::generate-test-runner # target, path, file-pattern
     BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$3)
     $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$3'))
     ifneq (,$$(BOWERBIRD_TEST_FILES/$1))
