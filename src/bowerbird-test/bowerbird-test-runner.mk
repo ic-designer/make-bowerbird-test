@@ -36,9 +36,7 @@ __UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
 
 @bowerbird-test/run-test/%: bowerbird-test/force
 	@mkdir -p $(WORKDIR_TEST)/$*
-	@($(MAKE) --debug=v $* \
-			SHELL='bash -x' \
-			MAKEFLAGS='$(MAKEFLAGS) --warn-undefined-variables' \
+	@($(MAKE) $* --debug=v --warn-undefined-variables SHELL='bash -x' \
 			1>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) \
 			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
 			(! (grep -v "grep.*$(__UNDEFINED_VARIABLE_WARNING_STRING)" \
