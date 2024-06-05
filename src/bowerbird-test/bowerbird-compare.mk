@@ -1,4 +1,4 @@
-define bowerbird::test::compare-string # lhs, rhs
+define bowerbird::test::compare-strings # lhs, rhs
     test "$1" = "$2" || (echo "ERROR: Failed string comparison: '$1' != '$2'" >&2 && exit 1)
 endef
 
