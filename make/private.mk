@@ -8,11 +8,11 @@ MAKEFLAGS += --shuffle
 MAKEFLAGS += --warn-undefined-variables
 
 # Constants
-NAME ?= $(error ERROR: Undefined variable NAME)
-VERSION ?= $(error ERROR: Undefined variable VERSION)
-WORKDIR_ROOT ?= $(error ERROR: Undefined variable WORKDIR_ROOT)
-WORKDIR_TEST = $(WORKDIR_ROOT)/test/$(NAME)/$(VERSION)
+NAME := bowerbird-test
+VERSION := $(shell git describe --always --dirty --broken 2> /dev/null)
+WORKDIR_ROOT := $(CURDIR)/.make
 WORKDIR_DEPS = $(WORKDIR_ROOT)/deps
+WORKDIR_TEST = $(WORKDIR_ROOT)/test/$(NAME)/$(VERSION)
 
 # Includes
 include make/deps.mk

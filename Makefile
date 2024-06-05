@@ -1,8 +1,5 @@
 # Constants
 .DEFAULT_GOAL := help
-NAME := boxerbird-test
-VERSION := $(shell git describe --always --dirty --broken 2> /dev/null)
-WORKDIR_ROOT := $(CURDIR)/.make
 
 #Targets
 .PHONY: check
