@@ -41,12 +41,12 @@ __UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
 			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
 			(! (grep -v "grep.*$(__UNDEFINED_VARIABLE_WARNING_STRING)" \
 					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) | \
-					grep "warning: undefined variable") || exit 1) && \
+					grep "warning: undefined variable" >&2) || exit 1) && \
 			printf "\e[1;32mPassed\e[0m: $*\n") || \
 	(printf "\e[1;31mFailed\e[0m: $*\n" && \
-			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) && \
-			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
-            printf "\e[1;31mFailed\e[0m: $*\n" && \
+			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) >&2 && \
+			cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) >&2 && \
+            printf "\e[1;31mFailed\e[0m: $*\n" >&2 && \
 			exit 1)
 
 .PHONY: bowerbird-test/force
