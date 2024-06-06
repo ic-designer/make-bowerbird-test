@@ -1,16 +1,52 @@
-# Constants
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
 BOWERBIRD_TEST_STDERR_EXT = stderr.txt
 BOWERBIRD_TEST_STDOUT_EXT = stdout.txt
 
-# Recipes
-define bowerbird::test::find-test-files # path, pattern
+
+# bowerbird::test::find-test-files,<path>,<pattern>
+#
+#   Returns a list of all the files matching the specified pattern under the directory
+#	tree starting with the specified path.
+#
+#   Args:
+#       path: Starting directory name for the search.
+#       pattern: Regular expression for matching filenames.
+#
+#   Example:
+#       $(call bowerbird::test::find-test-files,test/,test*.*)
+#
+define bowerbird::test::find-test-files
 $(shell find $(abspath $1) -type f -name '$2')
 endef
 
-define bowerbird::test::find-test-targets # list of test files
+# bowerbird::test::find-test-targets,<files>
+#
+#   Returns a list of make targets starting with prefix 'test' found in the specified
+#	list of files.
+#
+#   Args:
+#       files: List of files to search for make targets.
+#
+#   Example:
+#       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
+#
+define bowerbird::test::find-test-targets
 $(shell sed -n 's/\(^test[^:]*\):.*/\1/p' $1)
 endef
+
+# bowerbird::generate-test-runner,<target>,<path>,<file-pattern>
+
+#   Creates a target for running all the test targets found in files matching the
+# 	specified file pattern under the tree starting with the specified path.
+
+#   Args:
+#       target: Name of the test-runner target to create.
+#       path: Starting directory name for the search.
+#       pattern: Regular expression for matching filenames.
+
+#   Example:
+#       $(call bowerbird::generate-test-runner,test-target,test/,test*.mk)
+# 		make test-target
 
 define bowerbird::generate-test-runner # target, path, file-pattern
     BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$3)
