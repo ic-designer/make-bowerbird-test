@@ -33,7 +33,6 @@ endef
 #   Example:
 #       $(call bowerbird::test::compare-sets,equal-1 equal-2,equal-2 equal-1)
 #       ! $(call bowerbird::test::compare-sets,not-equal-1,not-equal-1 not-equal-2)
-
 define bowerbird::test::compare-sets
     test "$(sort $1)" = "$(sort $2)" || \
             (echo "ERROR: Failed list comparison: '$(sort $1)' != '$(sort $2)'" >&2 && \
