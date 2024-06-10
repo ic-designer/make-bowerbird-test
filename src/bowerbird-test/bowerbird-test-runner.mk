@@ -1,7 +1,5 @@
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
-BOWERBIRD_TEST_STDERR_EXT = stderr.txt
-BOWERBIRD_TEST_STDOUT_EXT = stdout.txt
-
+BOWERBIRD_TEST_EXT_LOG = log
 
 # bowerbird::test::find-test-files,<path>,<pattern>
 #
@@ -73,16 +71,14 @@ __UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
 @bowerbird-test/run-test/%: bowerbird-test/force
 	@mkdir -p $(WORKDIR_TEST)/$*
 	@($(MAKE) $* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
-			1>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) \
-			2>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) && \
+			>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_EXT_LOG) 2>&1 && \
 			(! (grep -v "grep.*$(__UNDEFINED_VARIABLE_WARNING_STRING)" \
-					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) | \
+					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_EXT_LOG) | \
 					grep --color=always "^.*$(__UNDEFINED_VARIABLE_WARNING_STRING).*$$" \
-					>> $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT)) || exit 1) && \
+					>> $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_EXT_LOG)) || exit 1) && \
 			printf "\e[1;32mPassed\e[0m: $*\n") || \
 		(printf "\e[1;31mFailed\e[0m: $*\n" && \
-			echo && cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDOUT_EXT) >&2 && \
-			echo && cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_STDERR_EXT) >&2 && \
+			echo && cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST_EXT_LOG) >&2 && \
 			echo && printf "\e[1;31mFailed\e[0m: $*\n" >&2 && exit 1)
 
 .PHONY: bowerbird-test/force

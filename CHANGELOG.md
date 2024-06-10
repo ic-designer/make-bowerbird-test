@@ -15,6 +15,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 ```
 
+## [Unreleased] - YYYY-MM-DD
+
+### Added
+### Changed
+- To help with debugging, the test output is now combined into a single log that shows
+  both stdout and stderr.
+### Deprecated
+### Fixed
+### Security
+
+
 ## [0.1.0] - 2024-06-06
 
 ### Added
