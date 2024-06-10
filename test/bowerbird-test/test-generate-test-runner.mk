@@ -12,15 +12,5 @@ test-generate-test-runner-mock-test-include: $(BOWERBIRD_TEST_TARGETS/run-genera
 
 test-generate-test-runner-mock-test-runner:
 	$(MAKE) run-generate-test-runner-mock-test
-	test -f $(WORKDIR_TEST)/test-find-files-alpha-1/test-find-files-alpha-1.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-alpha-1/test-find-files-alpha-1.$(BOWERBIRD_TEST_STDERR_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-alpha-2/test-find-files-alpha-2.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-alpha-2/test-find-files-alpha-2.$(BOWERBIRD_TEST_STDERR_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-beta-1/test-find-files-beta-1.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-beta-1/test-find-files-beta-1.$(BOWERBIRD_TEST_STDERR_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-beta-2/test-find-files-beta-2.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-beta-2/test-find-files-beta-2.$(BOWERBIRD_TEST_STDERR_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-gamma-1/test-find-files-gamma-1.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-gamma-1/test-find-files-gamma-1.$(BOWERBIRD_TEST_STDERR_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-gamma-2/test-find-files-gamma-2.$(BOWERBIRD_TEST_STDOUT_EXT)
-	test -f $(WORKDIR_TEST)/test-find-files-gamma-2/test-find-files-gamma-2.$(BOWERBIRD_TEST_STDERR_EXT)
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		test -f $(WORKDIR_TEST)/test-find-files-$(f)/test-find-files-$(f).$(BOWERBIRD_TEST_EXT_LOG);)
