@@ -144,7 +144,7 @@ define bowerbird::generate-test-runner-implementation # target, path
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";)
 
     .PHONY: bowerbird-test/runner/run-tests/$1
-    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
+    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
 
     .PHONY: $1
     $1:
@@ -152,25 +152,24 @@ define bowerbird::generate-test-runner-implementation # target, path
 		@$(MAKE) bowerbird-test/runner/run-tests/$1
 		@printf "\e[1;32mAll Test Passed\e[0m\n"
 
+    @bowerbird-test/run-test-target/%/$1: bowerbird-test/force
+		@mkdir -p $$(WORKDIR_TEST)/$$*
+		@($(MAKE) $$* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
+				>$$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) 2>&1 && \
+				(! (grep -v "grep.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING)" \
+						$$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) | \
+						grep --color=always "^.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING).*$$$$" \
+						>> $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)) || exit 1) && \
+				printf "\e[1;32mPassed\e[0m: $$*\n") || \
+			(printf "\e[1;31mFailed\e[0m: $$*\n" && \
+				echo && cat $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) >&2 && \
+				echo && printf "\e[1;31mFailed\e[0m: $$*\n" >&2 && exit 1)
+
     BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
     BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
 endef
 
-# Decorator Targets
-@bowerbird-test/run-test/%: bowerbird-test/force
-	@mkdir -p $(WORKDIR_TEST)/$*
-	@($(MAKE) $* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
-			>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) 2>&1 && \
-			(! (grep -v "grep.*$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING)" \
-					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) | \
-					grep --color=always "^.*$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING).*$$" \
-					>> $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)) || exit 1) && \
-			printf "\e[1;32mPassed\e[0m: $*\n") || \
-		(printf "\e[1;31mFailed\e[0m: $*\n" && \
-			echo && cat $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) >&2 && \
-			echo && printf "\e[1;31mFailed\e[0m: $*\n" >&2 && exit 1)
 
 .PHONY: bowerbird-test/force
 bowerbird-test/force:
 	@:
-#
