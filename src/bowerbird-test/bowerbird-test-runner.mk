@@ -1,4 +1,5 @@
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
+BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING = warning: undefined variable
 BOWERBIRD_TEST/CONSTANT/LOG_EXT = log
 BOWERBIRD_TEST/PATTERN/FILE/DEFAULT = test*.mk
 BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
@@ -156,15 +157,13 @@ define bowerbird::generate-test-runner-implementation # target, path
 endef
 
 # Decorator Targets
-__UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
-
 @bowerbird-test/run-test/%: bowerbird-test/force
 	@mkdir -p $(WORKDIR_TEST)/$*
 	@($(MAKE) $* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
 			>$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) 2>&1 && \
-			(! (grep -v "grep.*$(__UNDEFINED_VARIABLE_WARNING_STRING)" \
+			(! (grep -v "grep.*$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING)" \
 					$(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) | \
-					grep --color=always "^.*$(__UNDEFINED_VARIABLE_WARNING_STRING).*$$" \
+					grep --color=always "^.*$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING).*$$" \
 					>> $(WORKDIR_TEST)/$*/$(notdir $*).$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)) || exit 1) && \
 			printf "\e[1;32mPassed\e[0m: $*\n") || \
 		(printf "\e[1;31mFailed\e[0m: $*\n" && \
