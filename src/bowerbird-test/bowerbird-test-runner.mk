@@ -138,12 +138,17 @@ define bowerbird::generate-test-runner-implementation # target, path
         BOWERBIRD_TEST_TARGETS/$1 =
     endif
 
-    .PHONY: bowerbird-test/list-tests/$1 $$(BOWERBIRD_TEST_TARGETS/$1)
-    bowerbird-test/list-tests/$1:
+    .PHONY: bowerbird-test/runner/list-tests/$1 $$(BOWERBIRD_TEST_TARGETS/$1)
+    bowerbird-test/runner/list-tests/$1:
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";)
 
+    .PHONY: bowerbird-test/runner/run-tests/$1
+    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
+
     .PHONY: $1
-    $1: bowerbird-test/list-tests/$1 $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
+    $1:
+		@$(MAKE) bowerbird-test/runner/list-tests/$1
+		@$(MAKE) bowerbird-test/runner/run-tests/$1
 		@printf "\e[1;32mAll Test Passed\e[0m\n"
 
     BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
