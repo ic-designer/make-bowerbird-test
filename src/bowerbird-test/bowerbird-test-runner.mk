@@ -1,7 +1,9 @@
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
 BOWERBIRD_TEST_EXT_LOG = log
-BOWERBIRD_TEST/PATTERN/FILE = test*.mk
-BOWERBIRD_TEST/PATTERN/TARGET = test*
+BOWERBIRD_TEST/PATTERN/FILE/DEFAULT = test*.mk
+BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
+BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT = test*
+BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
 
 # bowerbird::test::find-test-files,<path>,<pattern>
 #
@@ -19,6 +21,7 @@ define bowerbird::test::find-test-files
 $(shell find $(abspath $1) -type f -name '$2')
 endef
 
+
 # bowerbird::test::find-test-targets,<files>,<pattern>
 #
 #   Returns a list of make targets starting with prefix 'test' found in the specified
@@ -32,17 +35,16 @@ endef
 #       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
 #
 define bowerbird::test::find-test-targets
-$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/PATTERN/TARGET))\):.*/\1/p' $1)
+$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))\):.*/\1/p' $1)
 endef
-
-# $(shell sed -n 's/\(^test[^:]*\):.*/\1/p' $1)
-
 
 
 # bowerbird::test::pattern-test-files,<patterns>
 #
-#   Changes the filename pattern used by bowerbird::test::find-test-files during test
-#	file discovery.
+#   Updates the filename pattern for test discovery used only by the next invocation of
+#   bowerbird::generate-test-runner. The call to bowerbird::generate-test-runner will
+#	revert the filename pattern back to the default value such that subsequent calls to
+#	bowerbird::generate-test-runner will use the default filename patter.
 #
 #   Args:
 #       pattern: Wildcard filename pattern.
@@ -52,13 +54,16 @@ endef
 #       $(call bowerbird::test::pattern-test-files,*test.*)
 #
 define bowerbird::test::pattern-test-files
-$(eval BOWERBIRD_TEST/PATTERN/FILE = $1)
+$(eval BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $1)
 endef
+
 
 # bowerbird::test::pattern-test-targets,<patterns>
 #
-#   Changes the target pattern used by bowerbird::test::find-test-targets during test
-#	target discovery.
+#   Updates the target pattern for test discovery used only by the next invocation of
+#   bowerbird::generate-test-runner. The call to bowerbird::generate-test-runner will
+#	revert the target pattern back to the default value such that subsequent calls to
+#	bowerbird::generate-test-runner will use the default target patten.
 #
 #   Args:
 #       pattern: Wildcard target pattern.
@@ -68,13 +73,14 @@ endef
 #       $(call bowerbird::test::pattern-test-targets,*_check)
 #
 define bowerbird::test::pattern-test-targets
-$(eval BOWERBIRD_TEST/PATTERN/TARGET= $1)
+$(eval BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED := $1)
 endef
+
 
 # bowerbird::generate-test-runner,<target>,<path>
 #
 #   Creates a target for running all the test targets discovered in the specified test
-#	file path. The test
+#	file path.
 #
 #   Args:
 #       target: Name of the test-runner target to create.
@@ -96,6 +102,7 @@ endef
 define bowerbird::generate-test-runner # target, path
 $(eval $(call bowerbird::generate-test-runner-implementation,$1,$2))
 endef
+
 
 # bowerbird::generate-test-runner-implementation,<target>,<path>
 #
@@ -120,23 +127,25 @@ endef
 # 		make test-target
 #
 define bowerbird::generate-test-runner-implementation # target, path
-
-    BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/PATTERN/FILE))
-    $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE)'))
+    BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED))
+    $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED)'))
     ifneq (,$$(BOWERBIRD_TEST_FILES/$1))
-        BOWERBIRD_TEST_TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST_FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET))
+        BOWERBIRD_TEST_TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST_FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))
         -include $$(BOWERBIRD_TEST_FILES/$1)
+    else
+        BOWERBIRD_TEST_TARGETS/$1 =
     endif
 
-    .PHONY: $$(BOWERBIRD_TEST_TARGETS/$1)
-
-    .PHONY: bowerbird-test/list-tests/$1
+    .PHONY: bowerbird-test/list-tests/$1 $$(BOWERBIRD_TEST_TARGETS/$1)
     bowerbird-test/list-tests/$1:
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";)
 
     .PHONY: $1
     $1: bowerbird-test/list-tests/$1 $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test/$$(target))
 		@printf "\e[1;32mAll Test Passed\e[0m\n"
+
+    BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
+    BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
 endef
 
 # Decorator Targets
@@ -158,3 +167,4 @@ __UNDEFINED_VARIABLE_WARNING_STRING:=warning: undefined variable
 .PHONY: bowerbird-test/force
 bowerbird-test/force:
 	@:
+#
