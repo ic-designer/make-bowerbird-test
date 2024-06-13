@@ -1,5 +1,6 @@
 # Process the mock tests
-$(eval $(call bowerbird::generate-test-runner,run-generate-test-runner-mock-test,test/mock-tests,mock-test*.mk))
+$(call bowerbird::test::pattern-test-files,mock-test*.mk)
+$(call bowerbird::generate-test-runner,run-generate-test-runner-mock-test,test/mock-tests)
 
 # Targets
 test-generate-test-runner-mock-test-files:

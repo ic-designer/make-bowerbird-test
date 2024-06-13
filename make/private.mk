@@ -28,4 +28,6 @@ private_clean:
 	@echo "INFO: Cleaning complete."
 	@echo
 
-$(eval $(call bowerbird::generate-test-runner,private_test,test/bowerbird-test/,test*.mk))
+$(call bowerbird::test::pattern-test-files,test*.mk)
+$(call bowerbird::test::pattern-test-targets,test*)
+$(call bowerbird::generate-test-runner,private_test,test/bowerbird-test)
