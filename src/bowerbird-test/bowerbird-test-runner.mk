@@ -131,7 +131,9 @@ define bowerbird::generate-test-runner-implementation # target, path
     $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED)'))
     ifneq (,$$(BOWERBIRD_TEST_FILES/$1))
         BOWERBIRD_TEST_TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST_FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))
-        -include $$(BOWERBIRD_TEST_FILES/$1)
+        ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST_FILES/$1)),)
+            -include $$(BOWERBIRD_TEST_FILES/$1)
+        endif
     else
         BOWERBIRD_TEST_TARGETS/$1 =
     endif
