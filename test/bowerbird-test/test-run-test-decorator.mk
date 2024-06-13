@@ -1,6 +1,6 @@
 test-run-test-decorator-failing-test-log-file-names:
 	! $(MAKE) @bowerbird-test/run-test/mock-test/$@/failing-test
-	test -f $(WORKDIR_TEST)/mock-test/$@/failing-test/failing-test.$(BOWERBIRD_TEST_EXT_LOG)
+	test -f $(WORKDIR_TEST)/mock-test/$@/failing-test/failing-test.$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)
 
 test-run-test-decorator-failing-test-printed-response:
 	$(call bowerbird::test::compare-strings,\
@@ -10,7 +10,7 @@ test-run-test-decorator-failing-test-printed-response:
 
 test-run-test-decorator-passing-test-log-file-names:
 	$(MAKE) @bowerbird-test/run-test/mock-test/$@/passing-test
-	test -f $(WORKDIR_TEST)/mock-test/$@/passing-test/passing-test.$(BOWERBIRD_TEST_EXT_LOG)
+	test -f $(WORKDIR_TEST)/mock-test/$@/passing-test/passing-test.$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)
 
 test-run-test-decorator-passing-test-printed-response:
 	$(call bowerbird::test::compare-strings,\
@@ -20,7 +20,7 @@ test-run-test-decorator-passing-test-printed-response:
 
 test-run-test-decorator-hierarchical-name-log-file-names:
 	$(MAKE) @bowerbird-test/run-test/mock-test/$@/alpha/beta/passing-test
-	test -f $(WORKDIR_TEST)/mock-test/$@/alpha/beta/passing-test/passing-test.$(BOWERBIRD_TEST_EXT_LOG)
+	test -f $(WORKDIR_TEST)/mock-test/$@/alpha/beta/passing-test/passing-test.$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)
 
 test-run-test-decorator-undefined-variable-check-is-undefined:
 	! $(MAKE) mock-test/force BOWERBIRD_TEST_VARIABLE=true
