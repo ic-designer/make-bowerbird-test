@@ -6,19 +6,19 @@ $(call bowerbird::generate-test-runner,run-generate-test-runner-mock-test,test/m
 # Targets
 test-generate-test-runner-mock-test-files:
 	$(call bowerbird::test::compare-sets,\
-			$(BOWERBIRD_TEST_FILES/run-generate-test-runner-mock-test),\
+			$(BOWERBIRD_TEST/FILES/run-generate-test-runner-mock-test),\
 			$(abspath test/mock-tests/alpha/beta/gamma/mock-test-gamma.mk) \
 					$(abspath test/mock-tests/alpha/beta/mock-test-beta.mk) \
 					$(abspath test/mock-tests/alpha/mock-test-alpha.mk))
 
 test-generate-test-runner-mock-test-targets:
 	$(call bowerbird::test::compare-sets,\
-			$(sort $(BOWERBIRD_TEST_TARGETS/run-generate-test-runner-mock-test)),\
+			$(sort $(BOWERBIRD_TEST/TARGETS/run-generate-test-runner-mock-test)),\
 			$(sort test-find-files-gamma-1 test-find-files-gamma-2 \
 					test-find-files-beta-1 test-find-files-beta-2 \
 					test-find-files-alpha-1 test-find-files-alpha-2))
 
-test-generate-test-runner-mock-test-include: $(BOWERBIRD_TEST_TARGETS/run-generate-test-runner-mock-test)
+test-generate-test-runner-mock-test-include: $(BOWERBIRD_TEST/TARGETS/run-generate-test-runner-mock-test)
 
 test-generate-test-runner-mock-test-runner:
 	$(MAKE) run-generate-test-runner-mock-test

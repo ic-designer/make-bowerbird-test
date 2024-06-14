@@ -133,20 +133,20 @@ endef
 # 		make test-target
 #
 define bowerbird::generate-test-runner-implementation # target, path
-    BOWERBIRD_TEST_FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED))
-    $$(if $$(BOWERBIRD_TEST_FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED)'))
-    ifneq (,$$(BOWERBIRD_TEST_FILES/$1))
-        BOWERBIRD_TEST_TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST_FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))
-        ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST_FILES/$1)),)
-            -include $$(BOWERBIRD_TEST_FILES/$1)
+    BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED))
+    $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED)'))
+    ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
+        BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))
+        ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST/FILES/$1)),)
+            -include $$(BOWERBIRD_TEST/FILES/$1)
         endif
     else
-        BOWERBIRD_TEST_TARGETS/$1 =
+        BOWERBIRD_TEST/TARGETS/$1 =
     endif
 
-    .PHONY: bowerbird-test/runner/list-tests/$1 $$(BOWERBIRD_TEST_TARGETS/$1)
+    .PHONY: bowerbird-test/runner/list-tests/$1 $$(BOWERBIRD_TEST/TARGETS/$1)
     bowerbird-test/runner/list-tests/$1:
-		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST_TARGETS/$1)),echo "    $$t";)
+		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST/TARGETS/$1)),echo "    $$t";)
 
     .PHONY: bowerbird-test/runner/clean-results/$1
     bowerbird-test/runner/clean-results/$1:
@@ -156,7 +156,7 @@ define bowerbird::generate-test-runner-implementation # target, path
 		@rm -f $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/*
 
     .PHONY: bowerbird-test/runner/run-tests/$1
-    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
+    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST/TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
 
     .PHONY: bowerbird-test/runner/report-results/$1
     bowerbird-test/runner/report-results/$1:
@@ -169,12 +169,12 @@ define bowerbird::generate-test-runner-implementation # target, path
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)')) \
 		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1); \
 		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1); \
-		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)) -lt $$(words $$(BOWERBIRD_TEST_TARGETS/$1)) || \
+		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)) -lt $$(words $$(BOWERBIRD_TEST/TARGETS/$1)) || \
 				(printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1))/$$(words \
-						$$(BOWERBIRD_TEST_TARGETS/$1)) passed\e[0m\n\n" && exit 0); \
+						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && exit 0); \
 		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)) -eq 0 || \
 				(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1))/$$(words \
-						$$(BOWERBIRD_TEST_TARGETS/$1)) failed\e[0m\n\n" && exit 1);
+						$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit 1);
 
     .PHONY: $1
     $1:
