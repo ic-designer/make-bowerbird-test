@@ -10,6 +10,7 @@ BOWERBIRD_TEST/CONSTANT/EXT_PASS = pass
 BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS = .results
 BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING = warning: undefined variable
 BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT = $(WORKDIR_TEST)
+BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS = $(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)
 
 
 # bowerbird::test::find-test-files,<path>,<pattern>
@@ -151,10 +152,10 @@ define bowerbird::generate-test-runner-implementation # target, path
 
     .PHONY: bowerbird-test/runner/clean-results/$1
     bowerbird-test/runner/clean-results/$1:
-		@test -n $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1
-		@mkdir -p $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1
-		@test -d $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1
-		@rm -f $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/*
+		@test -n $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1
+		@mkdir -p $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1
+		@test -d $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1
+		@rm -f $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/*
 
     .PHONY: bowerbird-test/runner/run-tests/$1
     bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST/TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
@@ -163,10 +164,10 @@ define bowerbird::generate-test-runner-implementation # target, path
     bowerbird-test/runner/report-results/$1:
 		@echo "reporting..."
 		@$$(eval BOWERBIRD_TEST/RESULTS/NUM_PASS/$1 = $$(shell find \
-				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1 \
+				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1 \
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)')) \
 		$$(eval BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1 = $$(shell find \
-				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1 \
+				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1 \
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)')) \
 		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1); \
 		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1); \
@@ -188,7 +189,7 @@ define bowerbird::generate-test-runner-implementation # target, path
 
     @bowerbird-test/run-test-target/%/$1: bowerbird-test/force
 		@mkdir -p $$(WORKDIR_TEST)/$$*
-		@mkdir -p $$(dir $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*)
+		@mkdir -p $$(dir $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*)
 		@($(MAKE) $$* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
 				>$$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) 2>&1 && \
 				(! (grep -v "grep.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING)" \
@@ -197,11 +198,11 @@ define bowerbird::generate-test-runner-implementation # target, path
 						>> $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)) || exit 1) && \
 				( \
 					printf "\e[1;32mPassed:\e[0m $$*\n" && \
-					printf "\e[1;32mPassed:\e[0m $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) \
+					printf "\e[1;32mPassed:\e[0m $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) \
 				)) || \
 			(\
 				printf "\e[1;31mFailed: $$*\e[0m\n" && \
-				printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
+				printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
 					echo && cat $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) >&2 && \
 					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit $$(BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE) \
 			)
