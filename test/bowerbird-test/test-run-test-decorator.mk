@@ -2,13 +2,13 @@ $(call bowerbird::generate-test-runner,mock-run-test-decorator-runner,mock)
 
 
 test-run-test-decorator-failing-test-log-file-names:
-	! $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-run-test-decorator-runner
+	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-run-test-decorator-runner
 	test -f $(WORKDIR_TEST)/mock-test/$@/failing-test/failing-test.$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)
 
 test-run-test-decorator-failing-test-printed-response:
 	$(call bowerbird::test::compare-strings,\
 			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-run-test-decorator-runner 2>/dev/null),\
-			$(shell printf "\e[1;31mFailed\e[0m: mock-test/test-run-test-decorator-failing-test-printed-response/failing-test"))
+			$(shell printf "\e[1;31mFailed: mock-test/test-run-test-decorator-failing-test-printed-response/failing-test\e[0m"))
 
 
 test-run-test-decorator-passing-test-log-file-names:
@@ -18,7 +18,7 @@ test-run-test-decorator-passing-test-log-file-names:
 test-run-test-decorator-passing-test-printed-response:
 	$(call bowerbird::test::compare-strings,\
 			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/passing-test/mock-run-test-decorator-runner 2>/dev/null),\
-			$(shell printf "\e[1;32mPassed\e[0m: mock-test/test-run-test-decorator-passing-test-printed-response/passing-test"))
+			$(shell printf "\e[1;32mPassed:\e[0m mock-test/test-run-test-decorator-passing-test-printed-response/passing-test"))
 
 
 test-run-test-decorator-hierarchical-name-log-file-names:
@@ -32,7 +32,7 @@ test-run-test-decorator-undefined-variable-check-is-undefined:
 test-run-test-decorator-undefined-variable-printed-response:
 	$(call bowerbird::test::compare-strings,\
 			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/undefined-variable-test/mock-run-test-decorator-runner 2>/dev/null),\
-			$(shell printf "\e[1;31mFailed\e[0m: mock-test/test-run-test-decorator-undefined-variable-printed-response/undefined-variable-test"))
+			$(shell printf "\e[1;31mFailed: mock-test/test-run-test-decorator-undefined-variable-printed-response/undefined-variable-test\e[0m"))
 
 
 mock-test/%/passing-test: mock-test/force
