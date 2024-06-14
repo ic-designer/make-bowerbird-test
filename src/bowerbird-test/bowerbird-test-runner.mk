@@ -10,6 +10,7 @@ BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT
 BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT = test*
 BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
 
+
 # bowerbird::test::find-test-files,<path>,<pattern>
 #
 #   Returns a list of all the files matching the specified pattern under the directory
