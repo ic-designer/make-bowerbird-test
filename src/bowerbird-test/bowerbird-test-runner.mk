@@ -1,14 +1,14 @@
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
-BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT = $(WORKDIR_TEST)
-BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS = .results
-BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING = warning: undefined variable
+BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT = test*.mk
+BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER = $(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT)
+BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_DEFAULT = test*
+BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER = $(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_DEFAULT)
+BOWERBIRD_TEST/CONSTANT/EXT_FAIL = fail
 BOWERBIRD_TEST/CONSTANT/EXT_LOG = log
 BOWERBIRD_TEST/CONSTANT/EXT_PASS = pass
-BOWERBIRD_TEST/CONSTANT/EXT_FAIL = fail
-BOWERBIRD_TEST/PATTERN/FILE/DEFAULT = test*.mk
-BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
-BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT = test*
-BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED = $(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
+BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS = .results
+BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING = warning: undefined variable
+BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT = $(WORKDIR_TEST)
 
 
 # bowerbird::test::find-test-files,<path>,<pattern>
@@ -41,7 +41,7 @@ endef
 #       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
 #
 define bowerbird::test::find-test-targets
-$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))\):.*/\1/p' $1)
+$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1)
 endef
 
 
@@ -60,7 +60,7 @@ endef
 #       $(call bowerbird::test::pattern-test-files,*test.*)
 #
 define bowerbird::test::pattern-test-files
-$(eval BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $1)
+$(eval BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER := $1)
 endef
 
 
@@ -79,7 +79,7 @@ endef
 #       $(call bowerbird::test::pattern-test-targets,*_check)
 #
 define bowerbird::test::pattern-test-targets
-$(eval BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED := $1)
+$(eval BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER := $1)
 endef
 
 
@@ -133,10 +133,10 @@ endef
 # 		make test-target
 #
 define bowerbird::generate-test-runner-implementation # target, path
-    BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED))
-    $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED)'))
+    BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
+    $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER)'))
     ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
-        BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED))
+        BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))
         ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST/FILES/$1)),)
             -include $$(BOWERBIRD_TEST/FILES/$1)
         endif
@@ -205,8 +205,8 @@ define bowerbird::generate-test-runner-implementation # target, path
 					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit 0 \
 			)
 
-    BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
-    BOWERBIRD_TEST/PATTERN/TARGET/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/TARGET/DEFAULT)
+    BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER := $$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT)
+    BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER := $$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_DEFAULT)
 endef
 
 
