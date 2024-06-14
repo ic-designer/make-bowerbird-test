@@ -157,13 +157,32 @@ define bowerbird::generate-test-runner-implementation # target, path
     .PHONY: bowerbird-test/runner/run-tests/$1
     bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST_TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
 
+    .PHONY: bowerbird-test/runner/report-results/$1
+    bowerbird-test/runner/report-results/$1:
+		@echo "reporting..."
+		@$$(eval BOWERBIRD_TEST/RESULTS/NUM_PASS/$1 = $$(shell find \
+				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1 \
+				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)')) \
+		$$(eval BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1 = $$(shell find \
+				$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1 \
+				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)')) \
+		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1); \
+		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1); \
+		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)) -lt $$(words $$(BOWERBIRD_TEST_TARGETS/$1)) || \
+				(printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1))/$$(words \
+						$$(BOWERBIRD_TEST_TARGETS/$1)) passed\e[0m\n\n" && exit 0); \
+		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)) -eq 0 || \
+				(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1))/$$(words \
+						$$(BOWERBIRD_TEST_TARGETS/$1)) failed\e[0m\n\n" && exit 1);
+
     .PHONY: $1
     $1:
 		test "$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)" != "$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)"
 		@$(MAKE) bowerbird-test/runner/clean-results/$1
 		@$(MAKE) bowerbird-test/runner/list-tests/$1
 		@$(MAKE) bowerbird-test/runner/run-tests/$1
-		@printf "\e[1;32mAll Test Passed\e[0m\n"
+		@$(MAKE) bowerbird-test/runner/report-results/$1
+
 
     @bowerbird-test/run-test-target/%/$1: bowerbird-test/force
 		@mkdir -p $$(WORKDIR_TEST)/$$*
@@ -175,14 +194,14 @@ define bowerbird::generate-test-runner-implementation # target, path
 						grep --color=always "^.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING).*$$$$" \
 						>> $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT)) || exit 1) && \
 				( \
-					printf "\e[1;32mPassed\e[0m: $$*\n" && \
-					printf "\e[1;32mPassed\e[0m: $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) \
+					printf "\e[1;32mPassed:\e[0m $$*\n" && \
+					printf "\e[1;32mPassed:\e[0m $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) \
 				)) || \
 			(\
-				printf "\e[1;31mFailed\e[0m: $$*\n" && \
-				printf "\e[1;31mFailed\e[0m: $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
+				printf "\e[1;31mFailed: $$*\e[0m\n" && \
+				printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
 					echo && cat $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/LOG_EXT) >&2 && \
-					echo && printf "\e[1;31mFailed\e[0m: $$*\n" >&2 && exit 1 \
+					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit 0 \
 			)
 
     BOWERBIRD_TEST/PATTERN/FILE/USER_DEFINED := $$(BOWERBIRD_TEST/PATTERN/FILE/DEFAULT)
