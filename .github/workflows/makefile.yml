@@ -15,6 +15,10 @@ jobs:
             os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v4
+    - name: Run help
+      run: |
+        make clean
+        make help
     - name: Run check
       run: |
         make clean
@@ -23,10 +27,11 @@ jobs:
       run: |
         make clean
         make test
-    - name: Run help
+    - name: Run test across configurations
       run: |
         make clean
-        make help
+        make test BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=1
+        make test BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=0
     - name: Run default
       run: |
         make clean

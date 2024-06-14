@@ -1,4 +1,5 @@
 WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
+BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE = 0
 BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT = test*.mk
 BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER = $(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT)
 BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_DEFAULT = test*
@@ -202,7 +203,7 @@ define bowerbird::generate-test-runner-implementation # target, path
 				printf "\e[1;31mFailed: $$*\e[0m\n" && \
 				printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
 					echo && cat $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) >&2 && \
-					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit 0 \
+					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit $$(BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE) \
 			)
 
     BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER := $$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT)
