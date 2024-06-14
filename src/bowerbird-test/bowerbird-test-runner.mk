@@ -7,9 +7,11 @@ BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER = $(BOWERBIRD_TEST/CONFIG/TARGET_PATTE
 BOWERBIRD_TEST/CONSTANT/EXT_FAIL = fail
 BOWERBIRD_TEST/CONSTANT/EXT_LOG = log
 BOWERBIRD_TEST/CONSTANT/EXT_PASS = pass
+BOWERBIRD_TEST/CONSTANT/SUBDIR_LOGS = .logs
 BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS = .results
 BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING = warning: undefined variable
 BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT = $(WORKDIR_TEST)
+BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS = $(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$(BOWERBIRD_TEST/CONSTANT/SUBDIR_LOGS)
 BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS = $(BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT)/$(BOWERBIRD_TEST/CONSTANT/SUBDIR_RESULTS)
 
 
@@ -188,14 +190,14 @@ define bowerbird::generate-test-runner-implementation # target, path
 
 
     @bowerbird-test/run-test-target/%/$1: bowerbird-test/force
-		@mkdir -p $$(WORKDIR_TEST)/$$*
+		@mkdir -p $$(dir $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/$$*)
 		@mkdir -p $$(dir $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*)
 		@($(MAKE) $$* --debug=v --warn-undefined-variables SHELL='sh -xvp' \
-				>$$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) 2>&1 && \
+				>$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) 2>&1 && \
 				(! (grep -v "grep.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING)" \
-						$$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) | \
+						$$(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) | \
 						grep --color=always "^.*$$(BOWERBIRD_TEST/CONSTANT/UNDEFINED_VARIABLE_WARNING).*$$$$" \
-						>> $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)) || exit 1) && \
+						>> $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)) || exit 1) && \
 				( \
 					printf "\e[1;32mPassed:\e[0m $$*\n" && \
 					printf "\e[1;32mPassed:\e[0m $$*\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) \
@@ -203,7 +205,7 @@ define bowerbird::generate-test-runner-implementation # target, path
 			(\
 				printf "\e[1;31mFailed: $$*\e[0m\n" && \
 				printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/$1/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL) && \
-					echo && cat $$(WORKDIR_TEST)/$$*/$$(notdir $$*).$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) >&2 && \
+					echo && cat $$(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/$$*.$$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) >&2 && \
 					echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && exit $$(BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE) \
 			)
 

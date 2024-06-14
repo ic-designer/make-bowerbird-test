@@ -12,7 +12,7 @@ test-runner-action-run-test-targets-failing-test-zero-exit-status:
 test-runner-action-run-test-targets-failing-test-generate-log-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-runner \
 			BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=0
-	test -f $(WORKDIR_TEST)/mock-test/$@/failing-test/failing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
+	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-test/$@/failing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
 
 test-runner-action-run-test-targets-failing-test-generate-failed-response-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-runner \
@@ -41,7 +41,7 @@ test-runner-action-run-test-targets-failing-test-printed-response:
 
 test-runner-action-run-test-targets-passing-test-generate-log-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/passing-test/mock-runner
-	test -f $(WORKDIR_TEST)/mock-test/$@/passing-test/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
+	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-test/$@/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
 
 test-runner-action-run-test-targets-passing-test-generate-passing-response-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/passing-test/mock-runner \
@@ -81,7 +81,7 @@ test-runner-action-run-test-targets-undefined-variable-zero-exit-status:
 test-runner-action-run-test-targets-undefined-variable-generate-log-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/undefined-variable-test/mock-runner \
 			BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=0 2>/dev/null
-	test -f $(WORKDIR_TEST)/mock-test/$@/undefined-variable-test/undefined-variable-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
+	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-test/$@/undefined-variable-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
 
 test-runner-action-run-test-targets-undefined-variable-test-generate-failed-response-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/undefined-variable-test/mock-runner \
@@ -109,7 +109,7 @@ test-runner-action-run-test-targets-undefined-variable-printed-response:
 
 test-runner-action-run-test-targets-hierarchical-name-generate-log-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/alpha/beta/passing-test/mock-runner
-	test -f $(WORKDIR_TEST)/mock-test/$@/alpha/beta/passing-test/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
+	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-test/$@/alpha/beta/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
 
 
 mock-test/%/passing-test: mock-test/force
