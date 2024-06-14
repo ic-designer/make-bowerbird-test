@@ -24,7 +24,7 @@ BOWERBIRD_TEST/CONSTANT/WORKDIR_ROOT = $(WORKDIR_TEST)
 #       $(call bowerbird::test::find-test-files,test/,test*.*)
 #
 define bowerbird::test::find-test-files
-$(shell find $(abspath $1) -type f -name '$2')
+$(shell find $(abspath $1) -type f -name '$2' 2>/dev/null)
 endef
 
 
@@ -41,7 +41,7 @@ endef
 #       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
 #
 define bowerbird::test::find-test-targets
-$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1)
+$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1  2>/dev/null)
 endef
 
 
