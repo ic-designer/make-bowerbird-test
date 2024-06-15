@@ -142,12 +142,16 @@ endef
 #
 define bowerbird::generate-test-runner-implementation
     $$(if $2,, $$(error ERROR: missing path in '$$$$(call bowerbird::generate-test-runner-implementation,$1,)))
-    BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
-    $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER)'))
-	ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
-        BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))
+    ifndef BOWERBIRD_TEST/FILES/$1
+        export BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
+        $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER)'))
+    endif
+    ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
+        ifndef BOWERBIRD_TEST/TARGETS/$1
+            export BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))
+        endif
         ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST/FILES/$1)),)
-            -include $$(BOWERBIRD_TEST/FILES/$1)
+            include $$(BOWERBIRD_TEST/FILES/$1)
         endif
     else
         BOWERBIRD_TEST/TARGETS/$1 =
