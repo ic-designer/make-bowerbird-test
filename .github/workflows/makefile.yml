@@ -15,10 +15,9 @@ jobs:
             os: [ubuntu-latest, macos-latest]
     steps:
     - uses: actions/checkout@v4
-    - name: Run help
+    - name: Debugging Log
       run: |
-        make clean
-        make help
+        make clean --debug=v SHELL='sh -xvp'
     - name: Run check
       run: |
         make clean
@@ -32,7 +31,7 @@ jobs:
         make clean
         make test BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=1
         make test BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE=0
-    - name: Run default
+    - name: Run help
       run: |
         make clean
-        make
+        make help
