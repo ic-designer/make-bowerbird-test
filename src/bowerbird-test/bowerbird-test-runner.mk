@@ -95,7 +95,6 @@ endef
 #   Args:
 #       target: Name of the test-runner target to create.
 #       path: Starting directory name for the search.
-#       pattern: Regular expression for matching filenames.
 #
 #   Configuration:
 #       pattern-test-files: Wildcard filename pattern used during test discovery.
@@ -104,6 +103,9 @@ endef
 #       pattern-test-targets: Wildcard target pattern used during test discovery.
 #			Refer to bowerbird::test::pattern-test-targets for more information about
 #			changing this value. Defaults to 'test*'.
+#
+#	Error:
+#		Throws an error if path empthy.
 #
 #   Example:
 #       $(call bowerbird::generate-test-runner,test-target,test-dir)
@@ -122,7 +124,6 @@ endef
 #   Args:
 #       target: Name of the test-runner target to create.
 #       path: Starting directory name for the search.
-#       pattern: Regular expression for matching filenames.
 #
 #   Configuration:
 #       pattern-test-files: Wildcard filename pattern used during test discovery.
@@ -132,14 +133,18 @@ endef
 #			Refer to bowerbird::test::pattern-test-targets for more information about
 #			changing this value. Defaults to 'test*'.
 #
+#	Error:
+#		Throws an error if path empthy.
+#
 #   Example:
 #       $(call bowerbird::generate-test-runner,test-target,test-dir)
 # 		make test-target
 #
-define bowerbird::generate-test-runner-implementation # target, path
+define bowerbird::generate-test-runner-implementation
+    $$(if $2,, $$(error ERROR: missing path in '$$$$(call bowerbird::generate-test-runner-implementation,$1,)))
     BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
     $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER)'))
-    ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
+	ifneq (,$$(BOWERBIRD_TEST/FILES/$1))
         BOWERBIRD_TEST/TARGETS/$1 := $$(call bowerbird::test::find-test-targets,$$(BOWERBIRD_TEST/FILES/$1),$$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))
         ifeq ($$(filter $$(MAKEFILE_LIST),$$(BOWERBIRD_TEST/FILES/$1)),)
             -include $$(BOWERBIRD_TEST/FILES/$1)

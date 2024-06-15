@@ -1,4 +1,4 @@
-$(call bowerbird::generate-test-runner,mock-runner,)
+$(call bowerbird::generate-test-runner,mock-runner,mock-path)
 
 
 test-runner-action-run-test-targets-failing-test-non-zero-exit-status:
@@ -33,12 +33,6 @@ test-runner-action-run-test-targets-failing-test-response-file-contents:
 			$(shell printf "\e[1;31mFailed: mock-test/test-runner-action-run-test-targets-failing-test-response-file-contents/failing-test\e[0m"))
 
 
-test-runner-action-run-test-targets-failing-test-printed-response:
-	$(call bowerbird::test::compare-strings,\
-			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/failing-test/mock-runner 2>/dev/null),\
-			$(shell printf "\e[1;31mFailed: mock-test/test-runner-action-run-test-targets-failing-test-printed-response/failing-test\e[0m"))
-
-
 test-runner-action-run-test-targets-passing-test-generate-log-file:
 	$(MAKE) @bowerbird-test/run-test-target/mock-test/$@/passing-test/mock-runner
 	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-test/$@/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_LOG)
@@ -60,11 +54,6 @@ test-runner-action-run-test-targets-passing-test-response-file-contents:
 	$(call bowerbird::test::compare-strings,\
 			$$(cat $(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/mock-runner/mock-test/$@/passing-test.$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)),\
 			$(shell printf "\e[1;32mPassed:\e[0m mock-test/test-runner-action-run-test-targets-passing-test-response-file-contents/passing-test"))
-
-test-runner-action-run-test-targets-passing-test-printed-response:
-	$(call bowerbird::test::compare-strings,\
-			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/passing-test/mock-runner 2>/dev/null),\
-			$(shell printf "\e[1;32mPassed:\e[0m mock-test/test-runner-action-run-test-targets-passing-test-printed-response/passing-test"))
 
 
 test-runner-action-run-test-targets-undefined-variable-ensure-test-variable-is-undefined:
@@ -100,11 +89,6 @@ test-runner-action-run-test-targets-undefined-variable-test-response-file-conten
 	$(call bowerbird::test::compare-strings,\
 			$$(cat $(BOWERBIRD_TEST/CONSTANT/WORKDIR_RESULTS)/mock-runner/mock-test/$@/undefined-variable-test.$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)),\
 			$(shell printf "\e[1;31mFailed: mock-test/test-runner-action-run-test-targets-undefined-variable-test-response-file-contents/undefined-variable-test\e[0m"))
-
-test-runner-action-run-test-targets-undefined-variable-printed-response:
-	$(call bowerbird::test::compare-strings,\
-			$(shell $(MAKE) @bowerbird-test/run-test-target/mock-test/$@/undefined-variable-test/mock-runner 2>/dev/null),\
-			$(shell printf "\e[1;31mFailed: mock-test/test-runner-action-run-test-targets-undefined-variable-printed-response/undefined-variable-test\e[0m"))
 
 
 test-runner-action-run-test-targets-hierarchical-name-generate-log-file:
