@@ -146,6 +146,7 @@ endef
 # 		make test-target
 #
 define bowerbird::generate-test-runner-implementation
+    $$(if $1,, $$(error ERROR: missing target in '$$$$(call bowerbird::generate-test-runner-implementation,<target>,<path>)))
     $$(if $2,, $$(error ERROR: missing path in '$$$$(call bowerbird::generate-test-runner-implementation,$1,)))
     ifndef BOWERBIRD_TEST/FILES/$1
         export BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
