@@ -22,9 +22,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   used during test discovery.
 - Created the `bowerbird::test::pattern-test-targets` macro to configure the target
   pattern used during test discovery.
+- Created internal hooks in preparation for a future `TESTFLAGS` argument
+  - `BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE` sets the exit code for failing tests.
+  - `BOWERBIRD_TEST/CONFIG/FAIL_FAST` helps terminate all the parallel make jobs
+    immediately when a test fails.
+  - `BOWERBIRD_TEST/CONFIG/FAIL_FIRST` will find failed tests from the previously
+    cached test results and try to re-run those failed tests first.
+- Added a debugging target to the workflow to help diagnose failed results on the
+  remote runners.
 ### Changed
 - Removed the filename pattern argument from the generate-test-runner macro. Patterns
-  read through a global configuration.
+  set using the new configuration macros `bowerbird::test::pattern-test-files` and
+  `bowerbird::test::pattern-test-targets`.
 - To help with debugging, the test output is now combined into a single log that shows
   both stdout and stderr.
 - All macros intended for use outside of target recipes no longer need the pattern
@@ -32,10 +41,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Renamed log extension variable from BOWERBIRD_TEST_EXT_LOG to the new name
   BOWERBIRD_TEST/CONSTANT/LOG_EXT in order to better group constants with a common
   prefix.
+- Renamed all the internal variables to use a consistent pattern.
+- Created series of "action" targets for running the test suite:
+  - `bowerbird-test/runner/list-discovered-tests/<target>`
+  - `bowerbird-test/runner/clean-results/<target>`
+  - `bowerbird-test/runner/run-primary-tests/$<target>`
+  - `bowerbird-test/runner/run-secondary-tests/<target>`
+  - `bowerbird-test/runner/report-results/<target>`
+- Individual test results are now saved to a cache directory organized by target name
+  so that reporting and analyzing the tests can performed separately from running the
+  tests.
 ### Deprecated
 ### Fixed
 - Removed flags from MAKEFLAGS unsupported by Make 3.81.
 - Fixed a bug causing errors when no test targets were discovered.
+- Removed the printed response test since controlling the standard output under all
+  scenarios is too hard.
 ### Security
 
 
