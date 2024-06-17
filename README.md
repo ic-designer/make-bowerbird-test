@@ -10,8 +10,8 @@ below. Please refer the [Bowerbird Depend Tools](https://github.com/ic-designer/
 for more information about the `bowerbird::git-dependency` macro.
 
 ```makefile
-$(eval $(call bowerbird::git-dependency,$(WORKDIR_DEPS)/bowerbird-test,\
-		https://github.com/ic-designer/make-bowerbird-test.git,main,bowerbird.mk))
+$(call bowerbird::git-dependency,$(WORKDIR_DEPS)/bowerbird-test,\
+		https://github.com/ic-designer/make-bowerbird-test.git,main,bowerbird.mk)
 ```
 
 ## Macros
