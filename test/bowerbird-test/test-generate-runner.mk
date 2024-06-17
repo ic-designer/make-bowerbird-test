@@ -23,4 +23,4 @@ test-generate-runner-mock-test-include: $(BOWERBIRD_TEST/TARGETS/run-generate-ru
 test-generate-runner-mock-test-runner:
 	$(MAKE) run-generate-runner-mock-test
 	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
-		test -f $(WORKDIR_TEST)/test-find-files-$(f)/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
+	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/run-generate-runner-mock-test/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
