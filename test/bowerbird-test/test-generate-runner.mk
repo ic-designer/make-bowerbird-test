@@ -20,7 +20,22 @@ test-generate-runner-mock-test-targets:
 
 test-generate-runner-mock-test-include: $(BOWERBIRD_TEST/TARGETS/mock-generate-runner)
 
-test-generate-runner-mock-test-runner:
+test-generate-runner-mock-test-runner-logs:
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		test ! -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG) || \
+		rm -f  $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		! test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
 	$(MAKE) mock-generate-runner
 	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
-	test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
+		test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_LOG);)
+
+test-generate-runner-mock-test-runner-results:
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		test ! -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_PASS) || \
+		rm -f  $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_PASS);)
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		! test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_PASS);)
+	$(MAKE) mock-generate-runner
+	$(foreach f,alpha-1 alpha-2 beta-1 beta-2 gamma-1 gamma-2,\
+		test -f $(BOWERBIRD_TEST/CONSTANT/WORKDIR_LOGS)/mock-generate-runner/test-find-files-$(f).$(BOWERBIRD_TEST/CONSTANT/EXT_PASS);)
