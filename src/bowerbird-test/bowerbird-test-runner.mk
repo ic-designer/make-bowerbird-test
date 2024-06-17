@@ -180,19 +180,19 @@ define bowerbird::generate-test-runner-implementation
     .PHONY: bowerbird-test/runner/report-results/$1
     bowerbird-test/runner/report-results/$1:
 		@echo "reporting..."
-		@$$(eval BOWERBIRD_TEST/RESULTS/NUM_PASS/$1 = $$(shell find \
+		@$$(eval BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1 = $$(shell find \
 				$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1 \
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)')) \
-		$$(eval BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1 = $$(shell find \
+		$$(eval BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1 = $$(shell find \
 				$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1 \
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)')) \
-		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1); \
-		test -z "$$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)" || cat $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1); \
-		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1)) -lt $$(words $$(BOWERBIRD_TEST/TARGETS/$1)) || \
-				(printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_PASS/$1))/$$(words \
+		test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1); \
+		test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1); \
+		test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)) -lt $$(words $$(BOWERBIRD_TEST/TARGETS/$1)) || \
+				(printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
 						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && exit 0); \
-		test $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1)) -eq 0 || \
-				(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/RESULTS/NUM_FAIL/$1))/$$(words \
+		test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)) -eq 0 || \
+				(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1))/$$(words \
 						$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit 1);
 
     .PHONY: $1
