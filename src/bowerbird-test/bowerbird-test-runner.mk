@@ -2,6 +2,7 @@ WORKDIR_TEST ?= $(error ERROR: Undefined variable WORKDIR_TEST)
 
 BOWERBIRD_TEST/CONFIG/FAIL_EXIT_CODE = 0
 BOWERBIRD_TEST/CONFIG/FAIL_FAST = 0
+BOWERBIRD_TEST/CONFIG/FAIL_FIRST = 0
 BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT = test*.mk
 BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER = $(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_DEFAULT)
 BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_DEFAULT = test*
@@ -92,6 +93,51 @@ $(eval BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER := $1)
 endef
 
 
+# bowerbird::find-previous-cached-test-result,<path>,<result>
+#
+#   Helper function for extracting the list of targets from cached tests matching the
+#	specified result.
+#
+#   Args:
+#       path: Path to the cached results directory.
+#       result: The desired test result. Typically one of the following values from:
+#			BOWERBIRD_TEST/CONSTANT/EXT_PASS or BOWERBIRD_TEST/CONSTANT/EXT_FAIL.
+#
+#	Error:
+#		Throws an error if path empty.
+#		Throws an result if result empty.
+#
+#   Example:
+#		$$(call bowerbird::find-previous-cached-test-result,<path>,<result>)
+#
+define bowerbird::find-previous-cached-test-result
+$$(if $1,,$$(error ERROR: bowerbird::find-previous-cached-test-result, no path specified)) \
+$$(if $2,,$$(error ERROR: bowerbird::find-previous-cached-test-result, no result specified)) \
+$$(foreach f,\
+    $$(shell test -d $1 && find $$(strip $1) -type f -name '*.$$(strip $2)'),\
+    $$(patsubst $$(abspath $$(strip $1))/%.$$(strip $2),%,$$f))
+endef
+
+
+# bowerbird::find-previously-failed-cached-test-result,<path>
+#
+#   Function for extracting the list of targets matching previously failed tests.
+#
+#   Args:
+#       path: Path to the cached results directory.
+#
+#	Error:
+#		Throws an error if path empty.
+#
+#   Example:
+#		$$(call bowerbird::find-previous-cached-test-result,<path>,<result>)
+#
+define bowerbird::find-previously-failed-cached-test-result
+$$(if $1,,$$(error ERROR: bowerbird::find-previously-failed-cached-test-result, no path specified)) \
+$(call bowerbird::find-previous-cached-test-result,$1,$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL))
+endef
+
+
 # bowerbird::generate-test-runner,<target>,<path>
 #
 #   Creates a target for running all the test targets discovered in the specified test
@@ -162,6 +208,15 @@ define bowerbird::generate-test-runner-implementation
     else
         BOWERBIRD_TEST/TARGETS/$1 =
     endif
+    ifneq ($$(BOWERBIRD_TEST/CONFIG/FAIL_FIRST),0)
+        ifndef BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1
+            export BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1 := $(call bowerbird::find-previously-failed-cached-test-result,$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1,$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL))
+        endif
+    else
+        BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1 =
+    endif
+    export BOWERBIRD_TEST/TARGETS_PRIMARY/$1 := $$(foreach target,$$(filter $$(BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1),$$(BOWERBIRD_TEST/TARGETS/$1)),@bowerbird-test/run-test-target/$$(target)/$1)
+    export BOWERBIRD_TEST/TARGETS_SECONDARY/$1 := $$(foreach target,$$(filter-out $$(BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1),$$(BOWERBIRD_TEST/TARGETS/$1)),@bowerbird-test/run-test-target/$$(target)/$1)
 
     .PHONY: bowerbird-test/runner/list-discovered-tests/$1 $$(BOWERBIRD_TEST/TARGETS/$1)
     bowerbird-test/runner/list-discovered-tests/$1:
@@ -174,8 +229,11 @@ define bowerbird::generate-test-runner-implementation
 		@test -d $$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1
 		@rm -f $$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1/*
 
-    .PHONY: bowerbird-test/runner/run-tests/$1
-    bowerbird-test/runner/run-tests/$1: $$(foreach target,$$(BOWERBIRD_TEST/TARGETS/$1),@bowerbird-test/run-test-target/$$(target)/$1)
+    .PHONY: bowerbird-test/runner/run-primary-tests/$1
+    bowerbird-test/runner/run-primary-tests/$1: $$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1)
+
+    .PHONY: bowerbird-test/runner/run-secondary-tests/$1
+    bowerbird-test/runner/run-secondary-tests/$1: $$(BOWERBIRD_TEST/TARGETS_SECONDARY/$1)
 
     .PHONY: bowerbird-test/runner/report-results/$1
     bowerbird-test/runner/report-results/$1:
@@ -200,7 +258,12 @@ define bowerbird::generate-test-runner-implementation
 		test "$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)" != "$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)"
 		@$(MAKE) bowerbird-test/runner/list-discovered-tests/$1
 		@$(MAKE) bowerbird-test/runner/clean-results/$1
-		@$(MAKE) bowerbird-test/runner/run-tests/$1
+ifneq ($$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1),)
+		@$(MAKE) bowerbird-test/runner/run-primary-tests/$1
+endif
+ifneq ($$(BOWERBIRD_TEST/TARGETS_SECONDARY/$1),)
+		@$(MAKE) bowerbird-test/runner/run-secondary-tests/$1
+endif
 		@$(MAKE) bowerbird-test/runner/report-results/$1
 
 
