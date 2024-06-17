@@ -34,7 +34,7 @@ BOWERBIRD_TEST/SYSTEM/MAKEPID := $(shell echo $$PPID)
 #       $(call bowerbird::test::find-test-files,test/,test*.*)
 #
 define bowerbird::test::find-test-files
-$(shell find $(abspath $1) -type f -name '$2' 2>/dev/null)
+$(shell test -d $1 && find $(abspath $1) -type f -name '$2' 2>/dev/null)
 endef
 
 
@@ -51,7 +51,7 @@ endef
 #       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
 #
 define bowerbird::test::find-test-targets
-$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1  2>/dev/null)
+$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1 2>/dev/null)
 endef
 
 
@@ -156,7 +156,7 @@ endef
 #			changing this value. Defaults to 'test*'.
 #
 #	Error:
-#		Throws an error if path empthy.
+#		Throws an error if path empty.
 #
 #   Example:
 #       $(call bowerbird::generate-test-runner,test-target,test-dir)
@@ -169,7 +169,7 @@ endef
 
 # bowerbird::generate-test-runner-implementation,<target>,<path>
 #
-#   Impplementation for creating a target for running all the test targets discovered
+#   Implementation for creating a target for running all the test targets discovered
 #   in the specified test file path. The test
 #
 #   Args:
@@ -185,15 +185,15 @@ endef
 #			changing this value. Defaults to 'test*'.
 #
 #	Error:
-#		Throws an error if path empthy.
+#		Throws an error if path empty.
 #
 #   Example:
 #       $(call bowerbird::generate-test-runner,test-target,test-dir)
 # 		make test-target
 #
 define bowerbird::generate-test-runner-implementation
-    $$(if $1,, $$(error ERROR: missing target in '$$$$(call bowerbird::generate-test-runner-implementation,<target>,<path>)))
-    $$(if $2,, $$(error ERROR: missing path in '$$$$(call bowerbird::generate-test-runner-implementation,$1,)))
+    $$(if $1,,$$(error ERROR: missing target in '$$$$(call bowerbird::generate-test-runner-implementation,<target>,<path>)))
+    $$(if $2,,$$(error ERROR: missing path in '$$$$(call bowerbird::generate-test-runner-implementation,$1,)))
     ifndef BOWERBIRD_TEST/FILES/$1
         export BOWERBIRD_TEST/FILES/$1 := $$(call bowerbird::test::find-test-files,$2,$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER))
         $$(if $$(BOWERBIRD_TEST/FILES/$1),,$$(warning WARNING: No test files found in '$2' matching '$$(BOWERBIRD_TEST/CONFIG/FILE_PATTERN_USER)'))
@@ -218,7 +218,7 @@ define bowerbird::generate-test-runner-implementation
     export BOWERBIRD_TEST/TARGETS_PRIMARY/$1 := $$(foreach target,$$(filter $$(BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1),$$(BOWERBIRD_TEST/TARGETS/$1)),@bowerbird-test/run-test-target/$$(target)/$1)
     export BOWERBIRD_TEST/TARGETS_SECONDARY/$1 := $$(foreach target,$$(filter-out $$(BOWERBIRD_TEST/CACHE/TESTS_PREV_FAILED/$1),$$(BOWERBIRD_TEST/TARGETS/$1)),@bowerbird-test/run-test-target/$$(target)/$1)
 
-    .PHONY: bowerbird-test/runner/list-discovered-tests/$1 $$(BOWERBIRD_TEST/TARGETS/$1)
+    .PHONY: bowerbird-test/runner/list-discovered-tests/$1
     bowerbird-test/runner/list-discovered-tests/$1:
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST/TARGETS/$1)),echo "    $$t";)
 
@@ -237,7 +237,6 @@ define bowerbird::generate-test-runner-implementation
 
     .PHONY: bowerbird-test/runner/report-results/$1
     bowerbird-test/runner/report-results/$1:
-		@echo "reporting..."
 		@$$(eval BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1 = $$(shell find \
 				$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_CACHE)/$1 \
 				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)')) \
@@ -255,7 +254,7 @@ define bowerbird::generate-test-runner-implementation
 
     .PHONY: $1
     $1:
-		test "$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)" != "$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)"
+		@test "$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)" != "$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)"
 		@$(MAKE) bowerbird-test/runner/list-discovered-tests/$1
 		@$(MAKE) bowerbird-test/runner/clean-results/$1
 ifneq ($$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1),)
