@@ -255,7 +255,7 @@ endef
 #       $(call bowerbird::test::find-test-targets,test-file-1.mk test-files-2.mk)
 #
 define bowerbird::test::find-test-targets
-$(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1 2>/dev/null)
+$(sort $(shell sed -n 's/\(^$(subst *,[^:]*,$(BOWERBIRD_TEST/CONFIG/TARGET_PATTERN_USER))\):.*/\1/p' $1 2>/dev/null))
 endef
 
 
