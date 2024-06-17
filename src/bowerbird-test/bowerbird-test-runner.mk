@@ -163,8 +163,8 @@ define bowerbird::generate-test-runner-implementation
         BOWERBIRD_TEST/TARGETS/$1 =
     endif
 
-    .PHONY: bowerbird-test/runner/list-tests/$1 $$(BOWERBIRD_TEST/TARGETS/$1)
-    bowerbird-test/runner/list-tests/$1:
+    .PHONY: bowerbird-test/runner/list-discovered-tests/$1 $$(BOWERBIRD_TEST/TARGETS/$1)
+    bowerbird-test/runner/list-discovered-tests/$1:
 		@echo "Discovered tests"; $$(foreach t,$$(sort $$(BOWERBIRD_TEST/TARGETS/$1)),echo "    $$t";)
 
     .PHONY: bowerbird-test/runner/clean-results/$1
@@ -198,8 +198,8 @@ define bowerbird::generate-test-runner-implementation
     .PHONY: $1
     $1:
 		test "$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)" != "$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)"
+		@$(MAKE) bowerbird-test/runner/list-discovered-tests/$1
 		@$(MAKE) bowerbird-test/runner/clean-results/$1
-		@$(MAKE) bowerbird-test/runner/list-tests/$1
 		@$(MAKE) bowerbird-test/runner/run-tests/$1
 		@$(MAKE) bowerbird-test/runner/report-results/$1
 
