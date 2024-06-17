@@ -1,4 +1,4 @@
-$(call bowerbird::generate-test-runner,mock-runner,mock-path)
+$(call bowerbird::test::generate-runner,mock-runner,mock-path)
 
 
 test-runner-action-run-test-targets-failing-test-non-zero-exit-status:

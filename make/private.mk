@@ -28,4 +28,4 @@ private_clean:
 
 $(call bowerbird::test::pattern-test-files,test*.mk)
 $(call bowerbird::test::pattern-test-targets,test*)
-$(call bowerbird::generate-test-runner,private_test,test/bowerbird-test)
+$(call bowerbird::test::generate-runner,private_test,test/bowerbird-test)

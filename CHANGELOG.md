@@ -18,11 +18,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased] - YYYY-MM-DD
 
 ### Added
+- Created the `bowerbird::test::pattern-test-files` macro to configure the file pattern
+  used during test discovery.
+- Created the `bowerbird::test::pattern-test-targets` macro to configure the target
+  pattern used during test discovery.
 ### Changed
+- Removed the filename pattern argument from the generate-test-runner macro. Patterns
+  read through a global configuration.
 - To help with debugging, the test output is now combined into a single log that shows
   both stdout and stderr.
+- All macros intended for use outside of target recipes no longer need the pattern
+  `$(eval $(call ... ))` and can instead simply use `$(call ...)`.
+- Renamed log extension variable from BOWERBIRD_TEST_EXT_LOG to the new name
+  BOWERBIRD_TEST/CONSTANT/LOG_EXT in order to better group constants with a common
+  prefix.
 ### Deprecated
 ### Fixed
+- Removed flags from MAKEFLAGS unsupported by Make 3.81.
+- Fixed a bug causing errors when no test targets were discovered.
 ### Security
 
 
