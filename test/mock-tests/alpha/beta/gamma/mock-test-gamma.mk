@@ -1,3 +1,4 @@
+test-find-files-gamma-1: TARGET_SPECIFIC_VARIABLE=
 test-find-files-gamma-1:
 	@:
 
