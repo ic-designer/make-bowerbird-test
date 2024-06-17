@@ -161,18 +161,23 @@ define bowerbird::test::generate-runner-implementation
     bowerbird-test/runner/report-results/$1:
 		@$$(eval BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1 = $$(shell find \
 				$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_RESULTS)/$1 \
-				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)')) \
+				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_PASS)'))
 		$$(eval BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1 = $$(shell find \
 				$$(BOWERBIRD_TEST/CONSTANT/WORDDIR_RESULTS)/$1 \
-				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)')) \
-		test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1); \
-		test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1); \
-		test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)) -lt $$(words $$(BOWERBIRD_TEST/TARGETS/$1)) || \
-				(printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
-						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && exit 0); \
-		test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)) -eq 0 || \
+				-type f -name '*.$$(BOWERBIRD_TEST/CONSTANT/EXT_FAIL)'))
+		@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)
+		@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)
+		@test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)) -eq 0 || \
 				(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1))/$$(words \
-						$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit 1);
+						$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit 1)
+		@test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)) -eq $$(words $$(BOWERBIRD_TEST/TARGETS/$1)) || \
+				(printf "\e[1;31mFailed: $1: Mismatch in the number of tests discovered: \
+						$$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
+						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && \
+						echo "Test Target: $$(BOWERBIRD_TEST/TARGETS/$1)" && exit 1)
+		printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
+						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n"
+		@
 
     .PHONY: $1
     $1:
