@@ -26,7 +26,7 @@ BOWERBIRD_TEST/SYSTEM/MAKEPID := $(shell echo $$PPID)
 #   Updates the filename pattern for test discovery used only by the next invocation of
 #   bowerbird::test::generate-runner. The call to bowerbird::test::generate-runner will
 #	revert the filename pattern back to the default value such that subsequent calls to
-#	bowerbird::test::generate-runner will use the default filename patter.
+#	bowerbird::test::generate-runner will use the default filename pattern.
 #
 #   Args:
 #       pattern: Wildcard filename pattern.
@@ -77,6 +77,7 @@ endef
 #			changing this value. Defaults to 'test*'.
 #
 #	Error:
+#		Throws an error if target empty.
 #		Throws an error if path empty.
 #
 #   Example:
