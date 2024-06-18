@@ -41,8 +41,11 @@ bowerbird::test::generate-runner,<target>,<path>
 	    Throws an error if path empty.
 
     Example:
+        ifdef bowerbird::test::generate-runner
         $(call bowerbird::test::generate-runner,test-target,test-dir)
- 		    make test-target
+        endif
+
+        make test-target
 ```
 
 ### `bowerbird::test::pattern-test-files`

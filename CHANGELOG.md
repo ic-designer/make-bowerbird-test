@@ -57,6 +57,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed a bug causing errors when no test targets were discovered.
 - Removed the printed response test since controlling the standard output under all
   scenarios is too hard.
+- Fixed bug in how pass and fail are determined when other bugs cause the number of
+  targets to be miscounted. Test now fail when a mismatch in the counts is discovered.
+- Fixed bug that created duplicate test targets when target specific variables were
+  used in a test.
 ### Security
 
 
