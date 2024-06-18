@@ -175,9 +175,8 @@ define bowerbird::test::generate-runner-implementation
 						$$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
 						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && \
 						echo "Test Target: $$(BOWERBIRD_TEST/TARGETS/$1)" && exit 1)
-		printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
+		@printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
 						$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n"
-		@
 
     .PHONY: $1
     $1:
