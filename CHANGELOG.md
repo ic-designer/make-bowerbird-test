@@ -15,15 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Security
 ```
 
-## [Unreleased] - YYYY-MM-DD
+## [Unreleased]
 
-### Added
-- Added `bowerbird-libs` as a dependency for kwargs support
 ### Changed
-- Converted all dependencies to use low-level API (`bowerbird::deps::git-dependency-low-level`)
+- **BREAKING**: Migrated from deprecated `make-bowerbird-deps` + `make-bowerbird-libs` to `make-bowerbird-core`
+- Updated dependency loading to use `bowerbird::core::git-dependency` API
+- Replaced `bowerbird-loader.mk` bootstrap for simplified setup
+
 ### Deprecated
-### Fixed
-### Security
+- `make-bowerbird-deps` - Use `make-bowerbird-core` instead
+- `make-bowerbird-libs` - Use `make-bowerbird-core` instead
 
 
 ## [0.3.0] - 2026-01-12
@@ -122,3 +123,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Removed an unused reference to the obsolete NEWLINE macro.
 - Removed  unnecessary comments and newlines from the test files.
+
+[Unreleased]: https://github.com/asikros/make-bowerbird-test/commits/main
