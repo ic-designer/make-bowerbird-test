@@ -96,6 +96,9 @@ bowerbird-test.config.target-patterns ?= test*
 bowerbird-test.constant.ext-fail = fail
 bowerbird-test.constant.ext-log = log
 bowerbird-test.constant.ext-pass = pass
+bowerbird-test.constant.ext-start = start
+bowerbird-test.constant.ext-end = end
+bowerbird-test.constant.ext-time = time
 bowerbird-test.constant.fail-exit-code = 1
 bowerbird-test.constant.generated-dir = $(WORKDIR_TEST)/.generated
 bowerbird-test.constant.process-tag = __BOWERBIRD_TEST_PROCESS_TAG__=$(shell echo $$PPID)
@@ -229,12 +232,18 @@ $$(BOWERBIRD_GENERATED/$1): $$(BOWERBIRD_TEST/FILES/$1)
 # Include the generated file (Make will re-execute if it doesn't exist or is outdated)
 -include $$(BOWERBIRD_GENERATED/$1)
 
+# Suite start time capture
+.PHONY: __suite-start/$1
+__suite-start/$1:
+	@mkdir -p $$(bowerbird-test.constant.workdir-results)/$1
+	@date +%s > $$(bowerbird-test.constant.workdir-results)/$1.suite.start
+
 # Main suite target depends on primary tests first, then secondary
 .PHONY: $1
 ifneq ($$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1),)
-$1: $$(foreach test,$$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1),__test-wrapper/$1/$$(test)) __run-secondary-tests/$1
+$1: __suite-start/$1 $$(foreach test,$$(BOWERBIRD_TEST/TARGETS_PRIMARY/$1),__test-wrapper/$1/$$(test)) __run-secondary-tests/$1
 else
-$1: $$(foreach test,$$(BOWERBIRD_TEST/TARGETS/$1),__test-wrapper/$1/$$(test))
+$1: __suite-start/$1 $$(foreach test,$$(BOWERBIRD_TEST/TARGETS/$1),__test-wrapper/$1/$$(test))
 endif
 	@$$(eval BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1 = $$(shell find \
 			$$(bowerbird-test.constant.workdir-results)/$1 \
@@ -244,6 +253,17 @@ endif
 			-type f -name '*.$$(bowerbird-test.constant.ext-fail)' 2>/dev/null))
 	@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)
 	@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)
+	@SUITE_START=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.start) && \
+	  SUITE_END=$$$$(date +%s) && \
+	  WALL_TIME=$$$$((SUITE_END - SUITE_START)) && \
+	  printf "%ss\n" "$$$$WALL_TIME" > $$(bowerbird-test.constant.workdir-results)/$1.suite.wall.time
+	@CUMULATIVE=0; \
+	  for f in $$(bowerbird-test.constant.workdir-results)/$1/*.$$(bowerbird-test.constant.ext-time); do \
+	    [ -f "$$$$f" ] || continue; \
+	    TIME=$$$$(cat "$$$$f" | sed 's/s$$$$//'); \
+	    CUMULATIVE=$$$$((CUMULATIVE + TIME)); \
+	  done; \
+	  printf "%ss\n" "$$$$CUMULATIVE" > $$(bowerbird-test.constant.workdir-results)/$1.suite.cumulative.time
 	@test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)) -eq 0 || \
 			(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1))/$$(words \
 					$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit $$(bowerbird-test.constant.fail-exit-code))
@@ -252,8 +272,10 @@ endif
 					$$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
 					$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n" && \
 					echo "Test Target: $$(BOWERBIRD_TEST/TARGETS/$1)" && exit $$(bowerbird-test.constant.fail-exit-code))
-	@printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
-					$$(BOWERBIRD_TEST/TARGETS/$1)) passed\e[0m\n\n"
+	@WALL=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.wall.time | sed 's/s$$$$//') && \
+	  CUMUL=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.cumulative.time | sed 's/s$$$$//') && \
+	  printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
+	    $$(BOWERBIRD_TEST/TARGETS/$1)) passed in $$$$WALL\s (wall) / $$$$CUMUL\s (cumulative)\e[0m\n\n"
 
 .PHONY: __run-secondary-tests/$1
 __run-secondary-tests/$1: $$(foreach test,$$(BOWERBIRD_TEST/TARGETS_SECONDARY/$1),__test-wrapper/$1/$$(test))
@@ -276,11 +298,18 @@ define bowerbird::test::__suite-generate-rules # output-file, suite-name
 		'BOWERBIRD_TEST/SUITE/$2/ext-log := $(bowerbird-test.constant.ext-log)' \
 		'BOWERBIRD_TEST/SUITE/$2/ext-pass := $(bowerbird-test.constant.ext-pass)' \
 		'BOWERBIRD_TEST/SUITE/$2/ext-fail := $(bowerbird-test.constant.ext-fail)' \
+		'BOWERBIRD_TEST/SUITE/$2/ext-start := $(bowerbird-test.constant.ext-start)' \
+		'BOWERBIRD_TEST/SUITE/$2/ext-end := $(bowerbird-test.constant.ext-end)' \
+		'BOWERBIRD_TEST/SUITE/$2/ext-time := $(bowerbird-test.constant.ext-time)' \
 		'' \
 		'# Pattern rule handles all test wrapper targets for suite: $2' \
 		'# Automatic variable $$* expands to the test name' \
 		'__test-wrapper/$2/%:' \
 		'	@mkdir -p $$(dir $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log))' \
+	'	@rm -f $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start) \' \
+	'	       $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) \' \
+	'	       $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time)' \
+	'	@date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)' \
 	'	@($$(MAKE) $$* --debug=v --warn-undefined-variables $$(BOWERBIRD_TEST/SUITE/$2/process-tag) \' \
 	'			>$$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) 2>&1 && \' \
 	'			(! (sed "s/\x1b\[[0-9;]*[a-zA-Z]//g" $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) | \' \
@@ -289,14 +318,24 @@ define bowerbird::test::__suite-generate-rules # output-file, suite-name
 	'					grep --color=always "^.*$$(BOWERBIRD_TEST/SUITE/$2/undefined-var-warning).*$$$$" \' \
 	'					>> $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log)) || exit $$(BOWERBIRD_TEST/SUITE/$2/fail-exit-code)) && \' \
 		'			( \' \
-		'				printf "\e[1;32mPassed:\e[0m $$*\n" && \' \
-		'				printf "\e[1;32mPassed:\e[0m $$*\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-pass) \' \
+		'				date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
+		'				START=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)) && \' \
+		'				END=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end)) && \' \
+		'				DURATION=$$$$((END - START)) && \' \
+		'				printf "%ss\n" "$$$$DURATION" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
+		'				printf "\e[1;32mPassed:\e[0m $$* ($$$$DURATION\s)\n" && \' \
+		'				printf "\e[1;32mPassed:\e[0m $$* ($$$$DURATION\s)\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-pass) \' \
 		'			)) || \' \
 		'		(\' \
-		'			printf "\e[1;31mFailed: $$*\e[0m\n" && \' \
-		'			printf "\e[1;31mFailed: $$*\e[0m\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
+		'			date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
+		'			START=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)) && \' \
+		'			END=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end)) && \' \
+		'			DURATION=$$$$((END - START)) && \' \
+		'			printf "%ss\n" "$$$$DURATION" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
+		'			printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" && \' \
+		'			printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
 		'				echo && cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) >&2 && \' \
-		'				echo && printf "\e[1;31mFailed: $$*\e[0m\n" >&2 && \' \
+		'				echo && printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" >&2 && \' \
 		'					(test $$(BOWERBIRD_TEST/SUITE/$2/fail-fast) -eq 0 || (kill -TERM $$$$(pgrep -f $$(BOWERBIRD_TEST/SUITE/$2/process-tag)))) && \' \
 		'					exit $$(BOWERBIRD_TEST/SUITE/$2/fail-exit-code) \' \
 		'		)' \
