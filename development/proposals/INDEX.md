@@ -13,6 +13,7 @@ Proposals under active development:
 - [01-mock-shell-testing.md](draft/01-mock-shell-testing.md) - Mock shell framework for testing Make recipes
 - [02-dynamic-include-test-runner.md](draft/02-dynamic-include-test-runner.md) - Dynamic include-based test runner
 - [03-pattern-based-test-execution.md](draft/03-pattern-based-test-execution.md) - Pattern rule optimization for test execution
+- [04-test-runtime-information.md](draft/04-test-runtime-information.md) - Runtime timing information for tests and test suites
 
 ## Accepted
 

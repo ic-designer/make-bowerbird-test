@@ -1,17 +1,18 @@
 # Mock Shell Testing Framework for Make Recipes
 
 ```
-Status:   Draft (Revision 2) - Historical Reference
+Status:   Implemented
 Project:  make-bowerbird-test
 Created:  2026-01-07
-Revised:  2026-01-08
+Revised:  2026-01-21
 Author:   Bowerbird Team
 ```
 
-> **Note:** This proposal describes the design and evolution of the mock shell testing
-> framework. The final implementation in `bowerbird-mock.mk` uses an inline shell string
-> instead of an external script file to avoid macOS Gatekeeper quarantine issues.
-> The core concepts and mechanisms described here remain accurate.
+> **Implementation Note:** The final implementation uses a static Bash script file
+> (`scripts/mock-shell.bash`) that is tracked in version control. This approach
+> provides better reliability, easier debugging, and consistent behavior across
+> platforms compared to dynamically generated scripts.
+> The core concepts and mechanisms described here reflect the actual implementation.
 
 ---
 
@@ -77,51 +78,75 @@ $(MAKE) target
 
 ### Mock Shell Script
 
+The mock shell is implemented as a static Bash script at `scripts/mock-shell.bash`:
+
+```bash
+#!/bin/bash
+for __c; do :; done
+__c_normalized=$(printf "%s" "$__c" | tr -d '\' | tr -s "[:space:]" " " | sed "s/^ //" | sed "s/ $$//")
+if [ "${__BOWERBIRD_MOCK_SHOW_SHELL+set}" = "set" ]; then
+  printf "%s %s %s\n" "$__BOWERBIRD_SHELL" "$__BOWERBIRD_SHELLFLAGS" "$__c_normalized" >>"$BOWERBIRD_MOCK_RESULTS"
+else
+  printf "%s\n" "$__c_normalized" >>"$BOWERBIRD_MOCK_RESULTS"
+fi
+```
+
+Referenced in `bowerbird-mock.mk`:
+
 ```makefile
-define bowerbird-mock-shell-rendering
-#!/bin/sh
-# Extract command (always last argument after SHELLFLAGS)
-eval "COMMAND=\"\$${$$#}\""
-echo "$$COMMAND" >> "$${BOWERBIRD_MOCK_RESULTS:?BOWERBIRD_MOCK_RESULTS must be set}"
-endef
+# Path to static mock shell script
+__BOWERBIRD_MOCK_SHELL_SCRIPT := $(dir $(lastword $(MAKEFILE_LIST)))../../scripts/mock-shell.bash
 
-BOWERBIRD_MOCK_SHELL := $(WORKDIR_TEST)/.mock-shell.sh
-BOWERBIRD_MOCK_MK := $(lastword $(MAKEFILE_LIST))
-
-$(BOWERBIRD_MOCK_SHELL): $(BOWERBIRD_MOCK_MK)
-	@mkdir -p $(dir $@)
-	$(file >$@,$(bowerbird-mock-shell-rendering))
-	@chmod +x $@
+ifdef BOWERBIRD_MOCK_RESULTS
+export __BOWERBIRD_SHELL := $(SHELL)
+export __BOWERBIRD_SHELLFLAGS = $(value .SHELLFLAGS)
+%: SHELL = /bin/bash $(__BOWERBIRD_MOCK_SHELL_SCRIPT)
+endif
 ```
 
 The mock shell:
 1. Receives all arguments: `$(SHELL) $(SHELLFLAGS) command`
-2. Extracts the last argument (which is always the command)
-3. Appends command to `BOWERBIRD_MOCK_RESULTS` file
-4. Does NOT execute the command
+2. Extracts the last argument (the command) using bash parameter expansion
+3. Normalizes line continuations by removing backslashes and collapsing whitespace
+4. Appends normalized command to `BOWERBIRD_MOCK_RESULTS` file
+5. Optionally captures SHELL and SHELLFLAGS if `__BOWERBIRD_MOCK_SHOW_SHELL` is set
+6. Does NOT execute the command
 
-**Note:** Using `$#` (last argument) ensures compatibility with any `.SHELLFLAGS`
-configuration, whether it's `-c`, `-e -u -c`, or any other combination.
+**Key Features:**
+- **Static file**: Tracked in version control, no dynamic generation needed
+- **Line continuation handling**: Normalizes `\` and whitespace for consistent output
+- **Cross-platform compatible**: Works reliably on macOS and Linux
+- **Optional shell capture**: Can capture SHELL and SHELLFLAGS for advanced testing
 
 ### Test Definition Macro
 
 ```makefile
-define bowerbird::test::add-mock-test
+define bowerbird::test::add-mock-test # test-name, target, expected-output, extra-args
+$(eval $(call bowerbird::test::__add-mock-test-impl,$(strip $1),$(strip $2),$(strip $3),$4))
+endef
+
+define bowerbird::test::__add-mock-test-impl # test-name, target, expected-output, extra-args
 .PHONY: $1
-$1: export BOWERBIRD_MOCK_RESULTS = $$(WORKDIR_TEST)/$1/.results
-$1: $$(BOWERBIRD_MOCK_SHELL)
+$1: SHELL = /bin/sh
+$1:
 	@mkdir -p $$(WORKDIR_TEST)/$1
-	@: > $$(WORKDIR_TEST)/$1/.results
-	$$(MAKE) $4 $2
-	@diff -u <(printf '%s\n' $3) $$(WORKDIR_TEST)/$1/.results
+	@: > $$(WORKDIR_TEST)/$1/results
+	$$(MAKE) -j1 BOWERBIRD_MOCK_RESULTS=$$(WORKDIR_TEST)/$1/results $4 $2
+	$$(call bowerbird::test::compare-file-content-from-var,$$(WORKDIR_TEST)/$1/results,$3)
 endef
 ```
 
 **Arguments:**
 - `$1`: Test name (e.g., `test-mock-clean`)
 - `$2`: Target to test (e.g., `clean`)
-- `$3`: Expected output lines (quoted, newline-separated)
-- `$4`: Optional extra make arguments
+- `$3`: Expected output variable name (define block with expected commands)
+- `$4`: Optional extra make arguments (e.g., `__BOWERBIRD_MOCK_SHOW_SHELL=`)
+
+**Key Changes:**
+- Uses `compare-file-content-from-var` for flexible comparison
+- Expected output is a variable name, not inline strings
+- Forces sequential execution with `-j1` to prevent parallel issues
+- Uses `/bin/sh` as outer shell for deterministic behavior
 
 ### Example Usage
 
@@ -132,12 +157,28 @@ clean:
 	@rm -rf $(WORKDIR)/build
 	@echo "Clean complete"
 
+# Expected output as define block
+define expected-clean
+rm -rf /tmp/build
+echo "Clean complete"
+endef
+
 # Test definition
 $(call bowerbird::test::add-mock-test,\
     test-mock-clean,\
     clean,\
-    "rm -rf /path/to/build" "echo Clean complete",\
-    )
+    expected-clean,)
+```
+
+**Optional: Capture SHELL and SHELLFLAGS**
+
+```makefile
+# Test that also captures which shell is being used
+$(call bowerbird::test::add-mock-test,\
+    test-mock-with-shell-info,\
+    clean,\
+    expected-with-shell,\
+    __BOWERBIRD_MOCK_SHOW_SHELL=)
 ```
 
 ---
