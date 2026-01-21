@@ -27,4 +27,4 @@ private_clean:
 	@echo "INFO: Cleaning complete."
 	@echo
 
-$(call bowerbird::test::suite,private_test,test/bowerbird-test,test*.mk,test*)
+$(call bowerbird::test::suite,private_check,test/bowerbird-test,test*.mk,test*)
