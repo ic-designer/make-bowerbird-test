@@ -30,7 +30,7 @@ __BOWERBIRD_TEST_FLAGS_DEFINED := 1
 #
 __BOWERBIRD_FAIL_FAST_FLAG = --bowerbird-fail-fast
 .PHONY: $(__BOWERBIRD_FAIL_FAST_FLAG)
-$(__BOWERBIRD_FAIL_FAST_FLAG):
+$(__BOWERBIRD_FAIL_FAST_FLAG): ## Kill all tests on first failure
 	@:
 
 # --bowerbird-fail-first
@@ -46,7 +46,22 @@ $(__BOWERBIRD_FAIL_FAST_FLAG):
 #
 __BOWERBIRD_FAIL_FIRST_FLAG = --bowerbird-fail-first
 .PHONY: $(__BOWERBIRD_FAIL_FIRST_FLAG)
-$(__BOWERBIRD_FAIL_FIRST_FLAG):
+$(__BOWERBIRD_FAIL_FIRST_FLAG): ## Run previously failed tests first
+	@:
+
+# --bowerbird-report-slow-tests
+#
+#	Optional flag to report the 3 slowest tests after suite completion.
+#
+#	When enabled, displays the 3 tests that took the longest time to execute.
+#
+#	Example:
+#		make test -- --bowerbird-report-slow-tests
+#		make check -- --bowerbird-report-slow-tests
+#
+__BOWERBIRD_REPORT_SLOW_TESTS_FLAG = --bowerbird-report-slow-tests
+.PHONY: $(__BOWERBIRD_REPORT_SLOW_TESTS_FLAG)
+$(__BOWERBIRD_REPORT_SLOW_TESTS_FLAG): ## Report the 3 slowest tests after suite completion
 	@:
 
 # --bowerbird-suppress-warnings
@@ -62,7 +77,7 @@ $(__BOWERBIRD_FAIL_FIRST_FLAG):
 #
 __BOWERBIRD_SUPPRESS_WARNINGS_FLAG = --bowerbird-suppress-warnings
 .PHONY: $(__BOWERBIRD_SUPPRESS_WARNINGS_FLAG)
-$(__BOWERBIRD_SUPPRESS_WARNINGS_FLAG):
+$(__BOWERBIRD_SUPPRESS_WARNINGS_FLAG): ## Suppress warning messages during test discovery
 	@:
 
 endif
@@ -79,6 +94,13 @@ ifneq ($(filter $(__BOWERBIRD_FAIL_FIRST_FLAG),$(MAKECMDGOALS)),)
     bowerbird-test.option.fail-first = 1
 else
     bowerbird-test.option.fail-first = 0
+endif
+
+# Set option value for --bowerbird-report-slow-tests
+ifneq ($(filter $(__BOWERBIRD_REPORT_SLOW_TESTS_FLAG),$(MAKECMDGOALS)),)
+    bowerbird-test.option.report-slow-tests = 1
+else
+    bowerbird-test.option.report-slow-tests = 0
 endif
 
 # Set option value for --bowerbird-suppress-warnings
@@ -134,6 +156,7 @@ bowerbird-test.constant.workdir-results = $(WORKDIR_TEST)/$(bowerbird-test.const
 #   Options (can be set via command line flags):
 #       bowerbird-test.option.fail-fast: Kill all tests on first failure (default: 0, set via --bowerbird-fail-fast)
 #       bowerbird-test.option.fail-first: Run failed tests first (default: 0, set via --bowerbird-fail-first)
+#       bowerbird-test.option.report-slow-tests: Report 3 slowest tests (default: 0, set via --bowerbird-report-slow-tests)
 #       bowerbird-test.option.suppress-warnings: Suppress warning messages (default: 0, set via --bowerbird-suppress-warnings)
 #
 #   Constants:
@@ -236,7 +259,7 @@ $$(BOWERBIRD_GENERATED/$1): $$(BOWERBIRD_TEST/FILES/$1)
 .PHONY: __suite-start/$1
 __suite-start/$1:
 	@mkdir -p $$(bowerbird-test.constant.workdir-results)/$1
-	@date +%s > $$(bowerbird-test.constant.workdir-results)/$1.suite.start
+	@python3 -c "import time; print(int(time.time() * 1000))" > $$(bowerbird-test.constant.workdir-results)/$1.suite.start
 
 # Main suite target depends on primary tests first, then secondary
 .PHONY: $1
@@ -254,16 +277,23 @@ endif
 	@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1)
 	@test -z "$$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)" || cat $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)
 	@SUITE_START=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.start) && \
-	  SUITE_END=$$$$(date +%s) && \
-	  WALL_TIME=$$$$((SUITE_END - SUITE_START)) && \
-	  printf "%ss\n" "$$$$WALL_TIME" > $$(bowerbird-test.constant.workdir-results)/$1.suite.wall.time
-	@CUMULATIVE=0; \
+	  SUITE_END=$$$$(python3 -c "import time; print(int(time.time() * 1000))") && \
+	  WALL_TIME_MS=$$$$((SUITE_END - SUITE_START)) && \
+	  WALL_S=$$$$((WALL_TIME_MS / 1000)) && \
+	  WALL_MS=$$$$((WALL_TIME_MS % 1000)) && \
+	  printf "%d.%03ds\n" "$$$$WALL_S" "$$$$WALL_MS" > $$(bowerbird-test.constant.workdir-results)/$1.suite.wall.time
+	@CUMULATIVE_MS=0; \
 	  for f in $$(bowerbird-test.constant.workdir-results)/$1/*.$$(bowerbird-test.constant.ext-time); do \
 	    [ -f "$$$$f" ] || continue; \
-	    TIME=$$$$(cat "$$$$f" | sed 's/s$$$$//'); \
-	    CUMULATIVE=$$$$((CUMULATIVE + TIME)); \
+	    TIME_STR=$$$$(cat "$$$$f" | sed 's/s$$$$//'); \
+	    TIME_S=$$$$(echo "$$$$TIME_STR" | cut -d. -f1); \
+	    TIME_MS=$$$$(echo "$$$$TIME_STR" | cut -d. -f2); \
+	    TIME_TOTAL_MS=$$$$((10#$$$$TIME_S * 1000 + 10#$$$$TIME_MS)); \
+	    CUMULATIVE_MS=$$$$((CUMULATIVE_MS + TIME_TOTAL_MS)); \
 	  done; \
-	  printf "%ss\n" "$$$$CUMULATIVE" > $$(bowerbird-test.constant.workdir-results)/$1.suite.cumulative.time
+	  CUMUL_S=$$$$((CUMULATIVE_MS / 1000)); \
+	  CUMUL_MS=$$$$((CUMULATIVE_MS % 1000)); \
+	  printf "%d.%03ds\n" "$$$$CUMUL_S" "$$$$CUMUL_MS" > $$(bowerbird-test.constant.workdir-results)/$1.suite.cumulative.time
 	@test $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1)) -eq 0 || \
 			(printf "\e[1;31mFailed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_FAILED_CURR/$1))/$$(words \
 					$$(BOWERBIRD_TEST/TARGETS/$1)) failed\e[0m\n\n" && exit $$(bowerbird-test.constant.fail-exit-code))
@@ -275,7 +305,23 @@ endif
 	@WALL=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.wall.time | sed 's/s$$$$//') && \
 	  CUMUL=$$$$(cat $$(bowerbird-test.constant.workdir-results)/$1.suite.cumulative.time | sed 's/s$$$$//') && \
 	  printf "\e[1;32mPassed: $1: $$(words $$(BOWERBIRD_TEST/CACHE/TESTS_PASSED_CURR/$1))/$$(words \
-	    $$(BOWERBIRD_TEST/TARGETS/$1)) passed in $$$$WALL\s (wall) / $$$$CUMUL\s (cumulative)\e[0m\n\n"
+	    $$(BOWERBIRD_TEST/TARGETS/$1)) passed in $$$${WALL}s (wall) / $$$${CUMUL}s (cumulative)\e[0m\n"
+	@test $$(bowerbird-test.option.report-slow-tests) -eq 0 || \
+	  (printf "\nSlowest tests:\n" && \
+	    for f in $$(bowerbird-test.constant.workdir-results)/$1/*.$$(bowerbird-test.constant.ext-time); do \
+	      [ -f "$$$$f" ] || continue; \
+	      TIME_STR=$$$$(cat "$$$$f" | sed 's/s$$$$//'); \
+	      TEST_NAME=$$$$(basename "$$$$f" .$$(bowerbird-test.constant.ext-time)); \
+	      TIME_S=$$$$(echo "$$$$TIME_STR" | cut -d. -f1); \
+	      TIME_MS=$$$$(echo "$$$$TIME_STR" | cut -d. -f2); \
+	      TIME_TOTAL_MS=$$$$((10#$$$$TIME_S * 1000 + 10#$$$$TIME_MS)); \
+	      printf "%010d %s\n" "$$$$TIME_TOTAL_MS" "$$$$TEST_NAME"; \
+	    done | sort -rn | head -3 | while read -r ms name; do \
+	      s=$$$$((10#$$$$ms / 1000)); \
+	      ms_part=$$$$((10#$$$$ms % 1000)); \
+	      printf "  (%d.%03ds) $$$$name\n" "$$$$s" "$$$$ms_part"; \
+	    done)
+	@echo
 
 .PHONY: __run-secondary-tests/$1
 __run-secondary-tests/$1: $$(foreach test,$$(BOWERBIRD_TEST/TARGETS_SECONDARY/$1),__test-wrapper/$1/$$(test))
@@ -309,7 +355,7 @@ define bowerbird::test::__suite-generate-rules # output-file, suite-name
 	'	@rm -f $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start) \' \
 	'	       $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) \' \
 	'	       $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time)' \
-	'	@date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)' \
+	'	@python3 -c "import time; print(int(time.time() * 1000))" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)' \
 	'	@($$(MAKE) $$* --debug=v --warn-undefined-variables $$(BOWERBIRD_TEST/SUITE/$2/process-tag) \' \
 	'			>$$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) 2>&1 && \' \
 	'			(! (sed "s/\x1b\[[0-9;]*[a-zA-Z]//g" $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) | \' \
@@ -318,24 +364,28 @@ define bowerbird::test::__suite-generate-rules # output-file, suite-name
 	'					grep --color=always "^.*$$(BOWERBIRD_TEST/SUITE/$2/undefined-var-warning).*$$$$" \' \
 	'					>> $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log)) || exit $$(BOWERBIRD_TEST/SUITE/$2/fail-exit-code)) && \' \
 		'			( \' \
-		'				date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
+		'				python3 -c "import time; print(int(time.time() * 1000))" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
 		'				START=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)) && \' \
 		'				END=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end)) && \' \
-		'				DURATION=$$$$((END - START)) && \' \
-		'				printf "%ss\n" "$$$$DURATION" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
-		'				printf "\e[1;32mPassed:\e[0m $$* ($$$$DURATION\s)\n" && \' \
-		'				printf "\e[1;32mPassed:\e[0m $$* ($$$$DURATION\s)\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-pass) \' \
+		'				DURATION_MS=$$$$((END - START)) && \' \
+		'				DURATION_S=$$$$((DURATION_MS / 1000)) && \' \
+		'				DURATION_MS_PART=$$$$((DURATION_MS % 1000)) && \' \
+		'				printf "%d.%03ds\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
+		'				printf "\e[1;32mPassed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" && \' \
+		'				printf "\e[1;32mPassed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-pass) \' \
 		'			)) || \' \
 		'		(\' \
-		'			date +%s > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
+		'			python3 -c "import time; print(int(time.time() * 1000))" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end) && \' \
 		'			START=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-start)) && \' \
 		'			END=$$$$(cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-end)) && \' \
-		'			DURATION=$$$$((END - START)) && \' \
-		'			printf "%ss\n" "$$$$DURATION" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
-		'			printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" && \' \
-		'			printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
+		'			DURATION_MS=$$$$((END - START)) && \' \
+		'			DURATION_S=$$$$((DURATION_MS / 1000)) && \' \
+		'			DURATION_MS_PART=$$$$((DURATION_MS % 1000)) && \' \
+		'			printf "%d.%03ds\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
+		'			printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" && \' \
+		'			printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
 		'				echo && cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) >&2 && \' \
-		'				echo && printf "\e[1;31mFailed: $$*\e[0m ($$$$DURATION\s)\n" >&2 && \' \
+		'				echo && printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" >&2 && \' \
 		'					(test $$(BOWERBIRD_TEST/SUITE/$2/fail-fast) -eq 0 || (kill -TERM $$$$(pgrep -f $$(BOWERBIRD_TEST/SUITE/$2/process-tag)))) && \' \
 		'					exit $$(BOWERBIRD_TEST/SUITE/$2/fail-exit-code) \' \
 		'		)' \
