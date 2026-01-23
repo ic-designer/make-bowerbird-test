@@ -288,7 +288,9 @@ endif
 	    TIME_STR=$$$$(cat "$$$$f" | sed 's/s$$$$//'); \
 	    TIME_S=$$$$(echo "$$$$TIME_STR" | cut -d. -f1); \
 	    TIME_MS=$$$$(echo "$$$$TIME_STR" | cut -d. -f2); \
-	    TIME_TOTAL_MS=$$$$((10#$$$$TIME_S * 1000 + 10#$$$$TIME_MS)); \
+	    TIME_S=$$$$(echo "$$$$TIME_S" | sed 's/^0*//;s/^$$$$/0/'); \
+	    TIME_MS=$$$$(echo "$$$$TIME_MS" | sed 's/^0*//;s/^$$$$/0/'); \
+	    TIME_TOTAL_MS=$$$$(($$$$TIME_S * 1000 + $$$$TIME_MS)); \
 	    CUMULATIVE_MS=$$$$((CUMULATIVE_MS + TIME_TOTAL_MS)); \
 	  done; \
 	  CUMUL_S=$$$$((CUMULATIVE_MS / 1000)); \
@@ -314,11 +316,14 @@ endif
 	      TEST_NAME=$$$$(basename "$$$$f" .$$(bowerbird-test.constant.ext-time)); \
 	      TIME_S=$$$$(echo "$$$$TIME_STR" | cut -d. -f1); \
 	      TIME_MS=$$$$(echo "$$$$TIME_STR" | cut -d. -f2); \
-	      TIME_TOTAL_MS=$$$$((10#$$$$TIME_S * 1000 + 10#$$$$TIME_MS)); \
+	      TIME_S=$$$$(echo "$$$$TIME_S" | sed 's/^0*//;s/^$$$$/0/'); \
+	      TIME_MS=$$$$(echo "$$$$TIME_MS" | sed 's/^0*//;s/^$$$$/0/'); \
+	      TIME_TOTAL_MS=$$$$(($$$$TIME_S * 1000 + $$$$TIME_MS)); \
 	      printf "%010d %s\n" "$$$$TIME_TOTAL_MS" "$$$$TEST_NAME"; \
 	    done | sort -rn | head -3 | while read -r ms name; do \
-	      s=$$$$((10#$$$$ms / 1000)); \
-	      ms_part=$$$$((10#$$$$ms % 1000)); \
+	      ms=$$$$(echo "$$$$ms" | sed 's/^0*//;s/^$$$$/0/'); \
+	      s=$$$$(($$$$ms / 1000)); \
+	      ms_part=$$$$(($$$$ms % 1000)); \
 	      printf "  (%d.%03ds) $$$$name\n" "$$$$s" "$$$$ms_part"; \
 	    done)
 	@echo
