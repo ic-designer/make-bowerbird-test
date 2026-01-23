@@ -1,10 +1,11 @@
 # Test Runtime Information
 
 ```
-Status:   Accepted
+Status:   Implemented
 Project:  make-bowerbird-test
 Created:  2026-01-21
 Accepted: 2026-01-22
+Implemented: 2026-01-22
 Author:   Bowerbird Team
 ```
 
