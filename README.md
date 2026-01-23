@@ -33,6 +33,8 @@ $(call bowerbird::test::suite,<target>,<paths>,<file-patterns>,<target-patterns>
 **Features:**
 - Fail-fast mode: Kill all tests on first failure with `--bowerbird-fail-fast`
 - Fail-first mode: Run previously failed tests first with `--bowerbird-fail-first`
+- Runtime timing: Automatic timing for all tests and test suites
+- Slow test reporting: Display 3 slowest tests with `--bowerbird-report-slow-tests`
 - Per-test isolation via recursive Make
 - Undefined variable detection per test
 - Colored output and detailed reporting
@@ -58,8 +60,36 @@ make private_test -- --bowerbird-fail-fast
 
 # Run with fail-first (previously failed tests run first)
 make private_test -- --bowerbird-fail-first
+
+# Run with slow test reporting
+make private_test -- --bowerbird-report-slow-tests
 ```
 
+**Runtime Timing:**
+
+All tests and test suites automatically capture timing information displayed in the output:
+
+```
+Passed: (0.125s) test-compare-strings
+Passed: (0.234s) test-compare-sets
+Failed: (1.456s) test-mock-output
+
+Passed: private_test: 45/46 passed in 8.345s (wall) / 15.234s (cumulative)
+```
+
+- **Individual test times**: Displayed in parentheses after each test result (millisecond precision)
+- **Wall time**: Actual elapsed time from suite start to finish (accounts for parallel execution)
+- **Cumulative time**: Sum of all individual test times (shows total CPU time)
+
+The timing files are stored in `.make/test/<suite-name>/.bowerbird/` and include:
+- `.start` - Test start timestamp (milliseconds since epoch)
+- `.end` - Test end timestamp (milliseconds since epoch)
+- `.time` - Test duration (formatted as `X.XXXs`)
+- `.suite.start` - Suite start timestamp
+- `.suite.wall.time` - Suite wall clock duration
+- `.suite.cumulative.time` - Suite cumulative duration
+
+Use `--bowerbird-report-slow-tests` to display the 3 slowest tests after suite completion.
 
 ### `bowerbird::test::compare-files`
 

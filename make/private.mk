@@ -1,9 +1,13 @@
 # Config
 .SUFFIXES:
-MAKEFLAGS += --jobs=8
+MAKEFLAGS += --jobs
 MAKEFLAGS += --no-builtin-rules
 MAKEFLAGS += --no-builtin-variables
 MAKEFLAGS += --warn-undefined-variables
+
+# Help system configuration
+bowerbird-help.width-target = 32
+bowerbird-help.width-description = 48
 
 # Constants
 NAME := bowerbird-test
@@ -27,4 +31,4 @@ private_clean:
 	@echo "INFO: Cleaning complete."
 	@echo
 
-$(call bowerbird::test::suite,private_test,test/bowerbird-test,test*.mk,test*)
+$(call bowerbird::test::suite,private_check,test/bowerbird-test,test*.mk,test*)

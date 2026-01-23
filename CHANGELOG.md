@@ -17,14 +17,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Runtime timing information** for all tests and test suites
+  - Individual test timing with millisecond precision displayed in test output
+  - Suite-level wall clock timing (actual elapsed time accounting for parallel execution)
+  - Suite-level cumulative timing (sum of all test times)
+  - Timing files: `.start`, `.end`, `.time`, `.suite.start`, `.suite.wall.time`, `.suite.cumulative.time`
+- Command-line flag `--bowerbird-report-slow-tests` to display 3 slowest tests after suite completion
+- Constants for timing file extensions: `ext-start`, `ext-end`, `ext-time`
+- Automatic cleanup of stale timing files before each test run
+
 ### Changed
 - **BREAKING**: Migrated from deprecated `make-bowerbird-deps` + `make-bowerbird-libs` to `make-bowerbird-core`
 - Updated dependency loading to use `bowerbird::core::git-dependency` API
 - Replaced `bowerbird-loader.mk` bootstrap for simplified setup
+- Test output now includes timing information in format: `Passed: (0.123s) test-name`
+- Suite summary now includes wall and cumulative timing: `45/45 passed in 8.3s (wall) / 15.2s (cumulative)`
 
 ### Deprecated
 - `make-bowerbird-deps` - Use `make-bowerbird-core` instead
 - `make-bowerbird-libs` - Use `make-bowerbird-core` instead
+
+### Fixed
+- Fixed `test-suite-constants-undefined-variable-warning` test by using string substitution to avoid literal "warning: undefined variable" string in test output
 
 
 ## [0.3.0] - 2026-01-12
