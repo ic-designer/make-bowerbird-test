@@ -4,5 +4,5 @@
 test fails, delete the code, and rerun make check. Unless you
 run make clean, the test still fails due to the .fail file even if the target is deleted
 - ability to select only specific tests
-- ~~include some information about how long tests take to run~~ → Implemented! See [Proposal 04: Test Runtime Information](development/proposals/accepted/04-test-runtime-information.md)
 - Test wrapper has a lot of repeated statements
+- How does bowerbird::test::find-test-targets handle ifdefs, it should skip them

@@ -38,6 +38,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `make-bowerbird-deps` - Use `make-bowerbird-core` instead
 - `make-bowerbird-libs` - Use `make-bowerbird-core` instead
 
+### Fixed
+- Fixed `test-suite-constants-undefined-variable-warning` test by using string substitution to avoid literal "warning: undefined variable" string in test output
+
 
 ## [0.3.0] - 2026-01-12
 

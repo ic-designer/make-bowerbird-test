@@ -382,10 +382,10 @@ define bowerbird::test::__suite-generate-rules # output-file, suite-name
 		'			DURATION_S=$$$$((DURATION_MS / 1000)) && \' \
 		'			DURATION_MS_PART=$$$$((DURATION_MS % 1000)) && \' \
 		'			printf "%d.%03ds\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-time) && \' \
-		'			printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" && \' \
-		'			printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
+		'			printf "\e[1;31mFailed: (%d.%03ds) $$*\e[0m\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" && \' \
+		'			printf "\e[1;31mFailed: (%d.%03ds) $$*\e[0m\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" > $$(BOWERBIRD_TEST/SUITE/$2/workdir-results)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-fail) && \' \
 		'				echo && cat $$(BOWERBIRD_TEST/SUITE/$2/workdir-logs)/$$*.$$(BOWERBIRD_TEST/SUITE/$2/ext-log) >&2 && \' \
-		'				echo && printf "\e[1;31mFailed:\e[0m (%d.%03ds) $$*\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" >&2 && \' \
+		'				echo && printf "\e[1;31mFailed: (%d.%03ds) $$*\e[0m\n" "$$$$DURATION_S" "$$$$DURATION_MS_PART" >&2 && \' \
 		'					(test $$(BOWERBIRD_TEST/SUITE/$2/fail-fast) -eq 0 || (kill -TERM $$$$(pgrep -f $$(BOWERBIRD_TEST/SUITE/$2/process-tag)))) && \' \
 		'					exit $$(BOWERBIRD_TEST/SUITE/$2/fail-exit-code) \' \
 		'		)' \
