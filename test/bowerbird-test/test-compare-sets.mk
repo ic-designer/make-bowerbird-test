@@ -71,8 +71,10 @@ test-compare-sets-special-chars:
 
 
 test-compare-sets-error-message:
-	@output=$$($(call bowerbird::test::compare-sets,alpha beta,gamma delta) 2>&1 || true); \
-		echo "$$output" | grep -q "ERROR: Failed list comparison: 'alpha beta' != 'delta gamma'"
+	@output=$$($(call bowerbird::test::compare-sets,\
+		alpha beta,gamma delta) 2>&1 || true); \
+		echo "$$output" | \
+		grep -q "ERROR: Failed list comparison: 'alpha beta' != 'delta gamma'"
 
 
 test-compare-sets-error-to-stderr:
