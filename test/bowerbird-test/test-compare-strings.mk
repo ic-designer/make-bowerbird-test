@@ -6,12 +6,12 @@ test-compare-strings-not-equal:
 	! $(call bowerbird::test::compare-strings,alpha,beta)
 
 
-test-compare-strings-not-equal-leading-whitespace:
-	! $(call bowerbird::test::compare-strings,alpha, alpha)
+test-compare-strings-equal-leading-whitespace-stripped:
+	$(call bowerbird::test::compare-strings,alpha, alpha)
 
 
-test-compare-strings-not-equal-trailing-whitespace:
-	! $(call bowerbird::test::compare-strings,alpha,alpha )
+test-compare-strings-equal-trailing-whitespace-stripped:
+	$(call bowerbird::test::compare-strings,alpha,alpha )
 
 
 test-compare-strings-not-equal-first-empty:
@@ -51,7 +51,8 @@ test-compare-strings-with-path:
 
 
 test-compare-strings-with-commas:
-	$(call bowerbird::test::compare-strings,alpha$(bowerbird::test::COMMA)beta,alpha$(bowerbird::test::COMMA)beta)
+	$(call bowerbird::test::compare-strings,\
+		alpha$(bowerbird::test::COMMA)beta,alpha$(bowerbird::test::COMMA)beta)
 
 
 test-compare-strings-with-dollar-sign:

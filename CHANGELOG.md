@@ -17,6 +17,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Code formatting**: Compare macro source and test files reformatted with line continuations to keep lines under 88 characters
+- Added `$(strip)` to all compare macro parameters for consistent whitespace handling
+- Standardized line continuation indentation to two tabs across all test files
+
 ### Added
 - **Runtime timing information** for all tests and test suites
   - Individual test timing with millisecond precision displayed in test output

@@ -14,7 +14,8 @@ endef
 test-compare-file-content-from-var-match:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '%s\n' "hello world" > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-hello)
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-hello)
 
 
 define expected-goodbye
@@ -24,7 +25,8 @@ endef
 test-compare-file-content-from-var-mismatch:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '%s\n' "hello world" > $(WORKDIR_TEST)/$@/test.txt
-	! ($(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-goodbye))
+	! ($(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-goodbye))
 
 
 define expected-any
@@ -32,7 +34,8 @@ any content
 endef
 
 test-compare-file-content-from-var-missing-file:
-	! ($(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/nonexistent.txt,expected-any))
+	! ($(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/nonexistent.txt,expected-any))
 
 
 # Multiline content tests
@@ -45,8 +48,10 @@ endef
 
 test-compare-file-content-from-var-multiline:
 	@mkdir -p $(WORKDIR_TEST)/$@
-	@printf 'line one\nline two\nline three\n' > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-multiline)
+	@printf 'line one\nline two\nline three\n' > \
+		$(WORKDIR_TEST)/$@/test.txt
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-multiline)
 
 
 define expected-empty
@@ -55,7 +60,8 @@ endef
 test-compare-file-content-from-var-empty:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '\n' > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-empty)
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-empty)
 
 
 define expected-content
@@ -65,7 +71,8 @@ endef
 test-compare-file-content-from-var-empty-expected-mismatch:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '%s\n' "content" > $(WORKDIR_TEST)/$@/test.txt
-	! ($(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-empty))
+	! ($(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-empty))
 
 
 # Whitespace tests
@@ -81,7 +88,8 @@ endef
 test-compare-file-content-from-var-whitespace-diff:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '%s\n' "hello world" > $(WORKDIR_TEST)/$@/test.txt
-	! ($(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-hello-double-space))
+	! ($(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-hello-double-space))
 
 
 # Special character tests
@@ -93,7 +101,8 @@ endef
 test-compare-file-content-from-var-special-chars:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf '%s\n' 'special @ # chars' > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-special)
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-special)
 
 
 define expected-long
@@ -102,8 +111,10 @@ endef
 
 test-compare-file-content-from-var-long-content:
 	@mkdir -p $(WORKDIR_TEST)/$@
-	@printf '%s\n' "This is a very long string that spans multiple lines" > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-long)
+	@printf '%s\n' "This is a very long string that spans multiple lines" > \
+		$(WORKDIR_TEST)/$@/test.txt
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-long)
 
 
 define expected-tabs
@@ -113,7 +124,8 @@ endef
 test-compare-file-content-from-var-tabs:
 	@mkdir -p $(WORKDIR_TEST)/$@
 	@printf 'hello\tworld\n' > $(WORKDIR_TEST)/$@/test.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/test.txt,expected-tabs)
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/test.txt,expected-tabs)
 
 
 # Mock test simulation - this is the real-world use case
@@ -126,8 +138,10 @@ endef
 
 test-compare-file-content-from-var-mock-simulation:
 	@mkdir -p $(WORKDIR_TEST)/$@
-	@printf '%s\n' 'echo "test command 1"' 'echo "test command 2"' 'mkdir -p /tmp/test' > $(WORKDIR_TEST)/$@/results.txt
-	$(call bowerbird::test::compare-file-content-from-var,$(WORKDIR_TEST)/$@/results.txt,mock-expected-commands)
+	@printf '%s\n' 'echo "test command 1"' 'echo "test command 2"' \
+		'mkdir -p /tmp/test' > $(WORKDIR_TEST)/$@/results.txt
+	$(call bowerbird::test::compare-file-content-from-var,\
+		$(WORKDIR_TEST)/$@/results.txt,mock-expected-commands)
 
 
 # Error message tests
